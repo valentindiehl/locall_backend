@@ -9,3 +9,13 @@ module.exports = (req) => {
     metadata: {},
   });
 }
+
+/*async () => {
+  const token = req.body.stripeToken;
+  const charge = await stripe.charges.create({
+    amount: parseInt(process.env.STRIPE_COST, 10),
+    currency: 'eur',
+    source: token,
+    receipt_email: '/*emailadress*/',
+  });
+})();*/
