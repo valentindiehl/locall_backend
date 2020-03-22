@@ -24,6 +24,7 @@
     "passport-local": "^1.0.0",
     "pino": "^5.17.0",
     "pino-http": "^4.4.0",
-    "pino-pretty": "^3.6.1"
+    "pino-pretty": "^3.6.1",
+    "socket.io": "^2.3.0"
   }
 }
