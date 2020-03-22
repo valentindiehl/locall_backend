@@ -1,5 +1,9 @@
 const jwt = require('express-jwt');
 
+const getTokenFromCookie = (req) => {
+    return req.cookies.token;
+}
+
 const getTokenFromHeaders = (req) => {
     const { headers: { authorization } } = req;
 
@@ -13,12 +17,12 @@ const auth = {
     required: jwt({
         secret: 'secret',
         userProperty: 'payload',
-        getToken: getTokenFromHeaders,
+        getToken: getTokenFromCookie,
     }),
     optional: jwt({
         secret: 'secret',
         userProperty: 'payload',
-        getToken: getTokenFromHeaders,
+        getToken: getTokenFromCookie,
         credentialsRequired: false,
     }),
 };

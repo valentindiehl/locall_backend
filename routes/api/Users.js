@@ -7,6 +7,8 @@ const Users = mongoose.model('Users');
 router.post('/', auth.optional, (req, res, next) => {
     const { body: { user } } = req;
 
+    console.log(req.body);
+
     if(!user.email) {
         return res.status(422).json({
             errors: {
@@ -58,7 +60,7 @@ router.post('/login', auth.optional, (req, res, next) => {
         if(passportUser) {
             const user = passportUser;
             user.token = passportUser.generateJWT();
-
+            res.cookie('token', user.token, { httpOnly: true });
             return res.json({ user: user.toAuthJSON() });
         }
 
@@ -77,6 +79,10 @@ router.get('/current', auth.required, (req, res, next) => {
 
             return res.json({ user: user.toAuthJSON() });
         });
+});
+
+router.get('/check', auth.required, (req, res, next) => {
+   res.sendStatus(200);
 });
 
 module.exports = router;
