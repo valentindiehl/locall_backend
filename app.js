@@ -12,6 +12,8 @@ const cookieParser = require('cookie-parser');
 
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
+var server = require('http').Server(app);
+const io = require('socket.io')(server);
 
 
 app.use(cors({
@@ -24,13 +26,13 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(require('morgan')('dev'));
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({ secret: 'sec', cookie: { maxAge: 60000 }, resave: false, saveUninitialized: false }));
+app.use(session({secret: 'sec', cookie: {maxAge: 60000}, resave: false, saveUninitialized: false}));
 
-if(!isProduction) {
-  app.use(errorHandler());
+if (!isProduction) {
+	app.use(errorHandler());
 }
 
 var dev_db_url = "mongodb://localhost/locall_dev";
@@ -70,4 +72,15 @@ app.use((err, req, res, next) => {
   });
 });
 
-app.listen(8000, () => console.log('Server running on http://localhost:8000/'));
+// IO Events
+
+io.on('connection', function (socket) {
+	console.log("New Connection!");
+	socket.on('message', function () {
+		// TODO
+	});
+});
+
+server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
+
+
