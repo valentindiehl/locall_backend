@@ -1,0 +1,82 @@
+{
+  "type": "geojson",
+  "data": {
+    "type": "FeatureCollection",
+    "features": [
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            11.577796,
+            48.149586
+          ]
+        },
+        "properties": {
+          "title": "55 Eleven",
+          "icon": "monument",
+          "description": "Blub"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            11.581594,
+            48.118522
+          ]
+        },
+        "properties": {
+          "title": "Das Edelweiß",
+          "icon": "restaurant"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            11.572989,
+            48.130503
+          ]
+        },
+        "properties": {
+          "title": "Pescheria",
+          "icon": "restaurant"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            11.566489,
+            48.131930
+          ]
+        },
+        "properties": {
+          "title": "Schnelle Liebe",
+          "icon": "bar"
+        }
+      },
+      {
+        "type": "Feature",
+        "geometry": {
+          "type": "Point",
+          "coordinates": [
+            11.575835,
+            48.161116
+          ]
+        },
+        "properties": {
+          "title": "Garbo",
+          "icon": "restaurant"
+        }
+      }
+    ]
+  }
+}
+
+
+

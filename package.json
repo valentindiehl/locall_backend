@@ -1,0 +1,29 @@
+{
+  "name": "locall-api",
+  "version": "1.0.0",
+  "description": "",
+  "author": "Valentin Diehl <valentin.diehl@tum.de>",
+  "keywords": [],
+  "license": "ISC",
+  "main": "app.js",
+  "scripts": {
+    "start": "./bin/app",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "errorhandler": "^1.5.1",
+    "express": "^4.17.1",
+    "express-jwt": "^5.3.1",
+    "express-session": "^1.17.0",
+    "http-errors": "^1.7.3",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^5.9.5",
+    "morgan": "^1.10.0",
+    "passport": "^0.4.1",
+    "passport-local": "^1.0.0",
+    "pino": "^5.17.0",
+    "pino-http": "^4.4.0",
+    "pino-pretty": "^3.6.1"
+  }
+}
