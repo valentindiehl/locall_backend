@@ -17,12 +17,12 @@ const io = require('socket.io')(server);
 
 
 app.use(cors({
-  origin: [
-    `${process.env.FRONT_URL}`,
-    'http://localhost:3000',
-    'https://mypage.com',
-  ],
-  credentials: true
+	origin: [
+		`${process.env.FRONT_URL}`,
+		'http://localhost:3000',
+		'https://mypage.com',
+	],
+	credentials: true
 }));
 app.use(cookieParser());
 app.use(require('morgan')('dev'));
@@ -38,7 +38,7 @@ if (!isProduction) {
 var dev_db_url = "mongodb://localhost/locall_dev";
 var mongoDB = process.env.MONGODB_URI || dev_db_url;
 var options = {
-  useNewUrlParser: true
+	useNewUrlParser: true
 };
 
 mongoose.connect(mongoDB, options);
@@ -48,38 +48,89 @@ require('./models/Users');
 require('./config/passport');
 app.use(require('./routes'));
 
-if(!isProduction) {
-  app.use((err, req, res, next) => {
-    res.status(err.status || 500);
+if (!isProduction) {
+	app.use((err, req, res, next) => {
+		res.status(err.status || 500);
 
-    res.json({
-      errors: {
-        message: err.message,
-        error: err,
-      },
-    });
-  });
+		res.json({
+			errors: {
+				message: err.message,
+				error: err,
+			},
+		});
+	});
 }
 
 app.use((err, req, res, next) => {
-  res.status(err.status || 500);
+	res.status(err.status || 500);
 
-  res.json({
-    errors: {
-      message: err.message,
-      error: {},
-    },
-  });
+	res.json({
+		errors: {
+			message: err.message,
+			error: {},
+		},
+	});
 });
 
 // IO Events
 
+// TODO: Use namespaces for different cafes later
+
+function leaveRoom(socket) {
+	roomId = socket.room;
+	if (roomId) {
+		socket.room = null;
+		socket.leave(roomId);
+		let room = io.of('/').in().adapter.rooms[roomId];
+		console.log("Leave room, now:", room);
+		updateAllRooms(socket);
+	}
+}
+
+function updateAllRooms(socket) {
+	const rooms = io.of("/").in().adapter.rooms;
+	socket.emit('updateRooms', rooms);
+}
+
 io.on('connection', function (socket) {
-	console.log("New Connection!");
-	socket.on('message', function () {
-		// TODO
+	console.log("New connection", socket.id)
+	socket.on('join', function (data) {
+		leaveRoom(socket);
+		const roomId = data.roomId;
+		console.log("Client wants to join", roomId);
+		socket.join(roomId);
+		socket.room = roomId;
+		const sockets = io.of('/').in().adapter.rooms[roomId];
+		if (sockets.length === 1) {
+			console.log("Emitting init signal");
+			socket.emit('init');
+		} else {
+			if (sockets.length <= 8) {
+				console.log("Emitting ready signal with length", sockets.length)
+				io.to(roomId).emit('ready');
+			} else {
+				leaveRoom(socket);
+				socket.emit('full');
+			}
+		}
+		updateAllRooms(socket)
+		console.log("Join room, now", sockets, "in chat room");
+	});
+	socket.on('signal', (data) => {
+		io.to(data.room).emit('desc', data.desc);
+	});
+	socket.on('leaveRoom', () => {
+		leaveRoom(socket);
+	});
+	socket.on('disconnect', () => {
+		console.log("Disconnect", socket.id);
+		leaveRoom(socket);
+	});
+	socket.on('requestRooms', function () {
+		updateAllRooms(socket);
 	});
 });
+
 
 server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
 
