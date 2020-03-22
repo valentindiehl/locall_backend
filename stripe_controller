@@ -1,1 +1,11 @@
 const stripe = require("stripe")("Test_Key");
+module.exports = (req) => {
+  const token = req.body.stripeToken;
+  return stripe.charges.create({
+    amount: parseInt(process.env.STRIPE_COST, 10),
+    currency: process.env.STRIPE_CCY,
+    source: token,
+    description: 'Zahlung',
+    metadata: {},
+  });
+}
