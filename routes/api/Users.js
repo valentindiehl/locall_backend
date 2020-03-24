@@ -88,6 +88,11 @@ router.get('/current', auth.required, (req, res, next) => {
         });
 });
 
+router.get('/logout', auth.optional, (req, res, next) => {
+   res.clearCookie('token');
+   return res.json({ message: 'Logged out'});
+});
+
 router.get('/check', auth.required, (req, res, next) => {
     console.log("Check successful");
    res.sendStatus(200);
