@@ -6,8 +6,6 @@ const Users = mongoose.model('Users');
 
 router.post('/', auth.optional, (req, res, next) => {
     const { body: { user } } = req;
-    console.log(req);
-    console.log(req.body);
 
     if(!user.email) {
         return res.status(422).json({
@@ -28,9 +26,26 @@ router.post('/', auth.optional, (req, res, next) => {
     const finalUser = new Users(user);
 
     finalUser.setPassword(user.password);
+    finalUser.generateOptInToken(user.email);
 
     return finalUser.save()
-        .then(() => res.json({ user: finalUser.toAuthJSON() }));
+        .then(() => res.json({ message: "E-Mail-Verification required. Message sent." }));
+});
+
+router.get('/verifyEmail', auth.optional, (req, res, next) => {
+    Users.findOne({ optInToken: req.query.token }, function(err, user) {
+        if (err) { return console.error(err); }
+        console.dir(user);
+
+        user.isOptedIn = true;
+        user.save(function (err) {
+            if (err) return console.error(err);
+            console.log('succesfully updated user');
+            console.log(user);
+
+            res.send(user);
+        });
+    });
 });
 
 router.post('/login', auth.optional, (req, res, next) => {
