@@ -40,5 +40,4 @@ UsersSchema.methods.toAuthJSON = function() {
         token: this.generateJWT(),
     };
 };
-
 mongoose.model('Users', UsersSchema);

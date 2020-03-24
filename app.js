@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 const errorHandler = require('errorhandler');
 const fs = require('fs');
 const certFileBuf = fs.readFileSync('./rds-combined-ca-bundle.pem');
@@ -46,6 +47,7 @@ mongoose.connect(mongoDB, options);
 mongoose.promise = global.Promise;
 mongoose.set('debug', true);
 require('./models/Users');
+require('./models/Businesses');
 require('./config/passport');
 app.use("/", require('./routes'));
 

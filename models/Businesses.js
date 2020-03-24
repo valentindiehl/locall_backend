@@ -1,4 +1,6 @@
 const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
+
 
 const { Schema } = mongoose;
 
@@ -22,5 +24,5 @@ const BusinessSchema = new Schema({
     ]
 });
 
-
-const Business = mongoose.model('Businesses', BusinessSchema);
+BusinessSchema.plugin(AutoIncrement, {inc_field: 'id'});
+mongoose.model('Businesses', BusinessSchema);
