@@ -75,21 +75,39 @@ app.use((err, req, res, next) => {
 // IO Events
 
 // TODO: Use namespaces for different cafes later
+const registeredRooms = [];
+
+function pick(data, keys) {
+	const result = {};
+
+	keys.forEach(function (key) {
+		if (data.hasOwnProperty(key)) {
+			result[key] = data[key];
+		}
+	});
+
+	return result;
+}
 
 function leaveRoom(socket) {
-	roomId = socket.room;
+	const roomId = socket.room;
 	if (roomId) {
 		socket.room = null;
 		socket.leave(roomId);
+		// TODO: Check if room is empty and remove from registered rooms
 		let room = io.of('/').in().adapter.rooms[roomId];
+		if (typeof room === "undefined" && registeredRooms.indexOf(roomId) >= 0) {
+			registeredRooms.splice(registeredRooms.indexOf(roomId), 1)
+		}
 		console.log("Leave room, now:", room);
 		updateAllRooms(socket);
 	}
 }
 
 function updateAllRooms(socket) {
-	const rooms = io.of("/").in().adapter.rooms;
+	const rooms = pick(io.of("/").in().adapter.rooms, registeredRooms);
 	socket.emit('updateRooms', rooms);
+	socket.broadcast.emit('updateRooms', rooms); // TODO: WHY DOES io.emit NOT WORK?!?!
 }
 
 io.on('connection', function (socket) {
@@ -101,16 +119,18 @@ io.on('connection', function (socket) {
 		socket.join(roomId);
 		socket.room = roomId;
 		const sockets = io.of('/').in().adapter.rooms[roomId];
-		if (sockets.length === 1) {
-			console.log("Emitting init signal");
-			socket.emit('init');
-		} else {
-			if (sockets.length <= 8) {
-				console.log("Emitting ready signal with length", sockets.length)
-				io.to(roomId).emit('ready');
+		if (typeof sockets !== 'undefined') {
+			if (sockets.length === 1) {
+				console.log("Emitting init signal");
+				socket.emit('init');
+				registeredRooms.push(roomId);
 			} else {
-				leaveRoom(socket);
-				socket.emit('full');
+				if (sockets.length <= 8) {
+					console.log("Emitting ready signal with length", sockets.length)
+				} else {
+					leaveRoom(socket);
+					socket.emit('full');
+				}
 			}
 		}
 		updateAllRooms(socket)
