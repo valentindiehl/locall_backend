@@ -36,7 +36,7 @@ if (!isProduction) {
 	app.use(errorHandler());
 }
 
-var dev_db_url = "mongodb://localhost/locall_dev";
+var dev_db_url = "mongodb://dev:kaffeebohne@54.93.107.7/locall_dev";
 var mongoDB = process.env.MONGODB_URI || dev_db_url;
 var options = {
   useNewUrlParser: true
