@@ -22,5 +22,5 @@ const BusinessSchema = new Schema({
     ]
 });
 
-mongoose.model('Businesses', BusinessSchema);
 
+const Business = mongoose.model('Businesses', BusinessSchema);

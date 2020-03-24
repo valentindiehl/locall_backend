@@ -6,7 +6,7 @@ const Users = mongoose.model('Users');
 
 router.post('/', auth.optional, (req, res, next) => {
     const { body: { user } } = req;
-
+    console.log(req);
     console.log(req.body);
 
     if(!user.email) {
@@ -36,6 +36,8 @@ router.post('/', auth.optional, (req, res, next) => {
 router.post('/login', auth.optional, (req, res, next) => {
     const { body: { user } } = req;
 
+    console.log(req.body);
+
     if(!user.email) {
         return res.status(422).json({
             errors: {
@@ -54,6 +56,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 
     return passport.authenticate('local', { session: false }, (err, passportUser, info) => {
         if(err) {
+            console.log(err);
             return next(err);
         }
 
@@ -64,7 +67,11 @@ router.post('/login', auth.optional, (req, res, next) => {
             return res.json({ user: user.toAuthJSON() });
         }
 
-        return status(400).info;
+        return res.status(400).json({
+            error: {
+                message: 'Bad request'
+            }
+        });
     })(req, res, next);
 });
 
@@ -82,6 +89,7 @@ router.get('/current', auth.required, (req, res, next) => {
 });
 
 router.get('/check', auth.required, (req, res, next) => {
+    console.log("Check successful");
    res.sendStatus(200);
 });
 

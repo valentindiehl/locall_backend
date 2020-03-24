@@ -9,8 +9,9 @@ const fs = require('fs');
 const certFileBuf = fs.readFileSync('./rds-combined-ca-bundle.pem');
 const cookieParser = require('cookie-parser');
 
+const { Schema } = mongoose;
 
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'debug';
 const app = express();
 var server = require('http').Server(app);
 const io = require('socket.io')(server);
@@ -46,7 +47,7 @@ mongoose.promise = global.Promise;
 mongoose.set('debug', true);
 require('./models/Users');
 require('./config/passport');
-app.use(require('./routes'));
+app.use("/", require('./routes'));
 
 if(!isProduction) {
   app.use((err, req, res, next) => {
@@ -71,7 +72,6 @@ app.use((err, req, res, next) => {
     },
   });
 });
-
 // IO Events
 
 io.on('connection', function (socket) {
