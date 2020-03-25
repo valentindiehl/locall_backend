@@ -3,6 +3,61 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('../auth');
 const Users = mongoose.model('Users');
+const axios = require('axios');
+
+router.post('/landing', auth.optional, (req, res, next) => {
+    const {body: {user}} = req;
+
+    if (!user.email) {
+        return res.status(422).json({
+            errors: {
+                email: 'is required',
+            },
+        });
+    }
+    axios.post('https://us19.api.mailchimp.com/3.0/lists/63f0ee09c6/members', {
+            email_address: user.email,
+            status: "pending"
+        },
+        {
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            auth: {
+                username: "locall_map",
+                password: "3d2dde5210b094d8d045ee206cc80c03-us19"
+            }
+        },
+    )
+        .then((data) => {
+            console.log("Addded user");
+            let segment_id = user.type === 'user' ? "1812935" : "1812939";
+            axios.post('https://us19.api.mailchimp.com/3.0/lists/63f0ee09c6/segments/' + segment_id + '/members', {
+                    email_address: user.email,
+                },
+                {
+                    auth: {
+                        username: "locall_map",
+                        password: "3d2dde5210b094d8d045ee206cc80c03-us19"
+                    }
+                })
+                .then((data) => {
+                    console.log("Addded user tags");
+                })
+                .catch((err) => {
+                    res.status(500);
+                    console.log(err);
+                    res.json(({message: err.message}));
+                });
+        })
+        .catch((err) => {
+            res.status(500);
+            console.log(err);
+            res.json(({message: err.message}));
+        })
+    res.status(200);
+    res.json({message: "Success. Please check E-mail"});
+});
 
 router.post('/', auth.optional, (req, res, next) => {
     const { body: { user } } = req;

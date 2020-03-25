@@ -9,7 +9,6 @@ const errorHandler = require('errorhandler');
 const fs = require('fs');
 const certFileBuf = fs.readFileSync('./rds-combined-ca-bundle.pem');
 const cookieParser = require('cookie-parser');
-
 const { Schema } = mongoose;
 
 const isProduction = process.env.NODE_ENV === 'debug';
@@ -46,8 +45,8 @@ var options = {
 mongoose.connect(mongoDB, options);
 mongoose.promise = global.Promise;
 mongoose.set('debug', true);
-require('./models/Users');
-require('./models/Businesses');
+require('./models/users');
+require('./models/businesses');
 require('./config/passport');
 app.use("/", require('./routes'));
 
