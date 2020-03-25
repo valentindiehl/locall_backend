@@ -22,7 +22,7 @@ router.get('/', auth.optional, (req, res, next) => {
             businessList["data"].push(business);
         });
 
-        res.send(businessList);
+        res.json(businessList);
     })
 });
 

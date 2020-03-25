@@ -10,6 +10,7 @@ const fs = require('fs');
 const certFileBuf = fs.readFileSync('./rds-combined-ca-bundle.pem');
 const cookieParser = require('cookie-parser');
 const { Schema } = mongoose;
+require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'debug';
 const app = express();
@@ -36,8 +37,7 @@ if (!isProduction) {
 	app.use(errorHandler());
 }
 
-var dev_db_url = "mongodb://dev:kaffeebohne@54.93.107.7/locall_dev";
-var mongoDB = process.env.MONGODB_URI || dev_db_url;
+var mongoDB = process.env.MONGODB_URI;
 var options = {
   useNewUrlParser: true
 };

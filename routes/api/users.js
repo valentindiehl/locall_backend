@@ -17,7 +17,10 @@ router.post('/landing', auth.optional, (req, res, next) => {
     }
     axios.post('https://us19.api.mailchimp.com/3.0/lists/63f0ee09c6/members', {
             email_address: user.email,
-            status: "pending"
+            status: "pending",
+            merge_fields: {
+                "BNAME": user.name
+            }
         },
         {
             headers: {
@@ -25,7 +28,7 @@ router.post('/landing', auth.optional, (req, res, next) => {
             },
             auth: {
                 username: "locall_map",
-                password: "3d2dde5210b094d8d045ee206cc80c03-us19"
+                password: process.env.MAILCHIMP_API_KEY
             }
         },
     )
@@ -38,11 +41,13 @@ router.post('/landing', auth.optional, (req, res, next) => {
                 {
                     auth: {
                         username: "locall_map",
-                        password: "3d2dde5210b094d8d045ee206cc80c03-us19"
+                        password: process.env.MAILCHIMP_API_KEY
                     }
                 })
                 .then((data) => {
                     console.log("Addded user tags");
+                    res.status(200);
+                    res.json({message: "Success. Please check E-mail"});
                 })
                 .catch((err) => {
                     res.status(500);
@@ -55,8 +60,6 @@ router.post('/landing', auth.optional, (req, res, next) => {
             console.log(err);
             res.json(({message: err.message}));
         })
-    res.status(200);
-    res.json({message: "Success. Please check E-mail"});
 });
 
 router.post('/', auth.optional, (req, res, next) => {
