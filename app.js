@@ -7,7 +7,6 @@ const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 const errorHandler = require('errorhandler');
 const fs = require('fs');
-const certFileBuf = fs.readFileSync('./rds-combined-ca-bundle.pem');
 const cookieParser = require('cookie-parser');
 const { Schema } = mongoose;
 require('dotenv').config();
