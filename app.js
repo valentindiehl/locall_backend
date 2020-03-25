@@ -15,6 +15,7 @@ const app = express();
 var server = require('http').Server(app);
 const io = require('socket.io')(server);
 
+const roomHandler = require('./handlers/RoomHandler');
 
 app.use(cors({
 	origin: [
@@ -72,85 +73,15 @@ app.use((err, req, res, next) => {
 	});
 });
 
-// IO Events
-
-// TODO: Use namespaces for different cafes later
-const registeredRooms = [];
-
-function pick(data, keys) {
-	const result = {};
-
-	keys.forEach(function (key) {
-		if (data.hasOwnProperty(key)) {
-			result[key] = data[key];
-		}
-	});
-
-	return result;
-}
-
-function leaveRoom(socket) {
-	const roomId = socket.room;
-	if (roomId) {
-		socket.room = null;
-		socket.leave(roomId);
-		// TODO: Check if room is empty and remove from registered rooms
-		let room = io.of('/').in().adapter.rooms[roomId];
-		if (typeof room === "undefined" && registeredRooms.indexOf(roomId) >= 0) {
-			registeredRooms.splice(registeredRooms.indexOf(roomId), 1)
-		}
-		console.log("Leave room, now:", room);
-		updateAllRooms(socket);
-	}
-}
-
-function updateAllRooms(socket) {
-	const rooms = pick(io.of("/").in().adapter.rooms, registeredRooms);
-	socket.emit('updateRooms', rooms);
-	socket.broadcast.emit('updateRooms', rooms); // TODO: WHY DOES io.emit NOT WORK?!?!
-}
-
 io.on('connection', function (socket) {
-	console.log("New connection", socket.id)
-	socket.on('join', function (data) {
-		leaveRoom(socket);
-		const roomId = data.roomId;
-		console.log("Client wants to join", roomId);
-		socket.join(roomId);
-		socket.room = roomId;
-		const sockets = io.of('/').in().adapter.rooms[roomId];
-		if (typeof sockets !== 'undefined') {
-			if (sockets.length === 1) {
-				console.log("Emitting init signal");
-				socket.emit('init');
-				registeredRooms.push(roomId);
-			} else {
-				if (sockets.length <= 8) {
-					console.log("Emitting ready signal with length", sockets.length)
-				} else {
-					leaveRoom(socket);
-					socket.emit('full');
-				}
-			}
-		}
-		updateAllRooms(socket)
-		console.log("Join room, now", sockets, "in chat room");
-	});
-	socket.on('signal', (data) => {
-		io.to(data.room).emit('desc', data.desc);
-	});
-	socket.on('leaveRoom', () => {
-		leaveRoom(socket);
-	});
-	socket.on('disconnect', () => {
-		console.log("Disconnect", socket.id);
-		leaveRoom(socket);
-	});
-	socket.on('requestRooms', function () {
-		updateAllRooms(socket);
-	});
-});
+	console.log('New client!', socket.id);
+	roomHandler.init(io, socket);
 
+	socket.on('disconnect', function () {
+		console.log('Client left!', socket.id);
+		roomHandler.handleDisconnect(io, socket);
+	});
+})
 
 server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
 
