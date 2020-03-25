@@ -36,6 +36,7 @@ module.exports = {
 				return;
 			}
 			if (roomId === leaveRoom(socket, io)) {
+				// User clicked same room => do not join again and update others
 				updateRoomsBroadcast(socket);
 			} else {
 				joinRoom(io, socket, roomId);
