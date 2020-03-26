@@ -11,7 +11,7 @@ module.exports = {
 		});
 
 		socket.on('addTable', function () {
-			if (registeredRooms.length >= 8) {
+			if (Object.keys(registeredRooms).length >= 8) {
 				socket.emit('tableException', {message: 'Sorry. there are no tables left.'});
 				return;
 			}
@@ -69,7 +69,11 @@ function updateRoomsBroadcast(socket) {
 function joinRoom(io, socket, roomId) {
 	socket.room = roomId;
 	socket.join(roomId);
-	if (typeof registeredRooms[roomId] === 'undefined') registeredRooms[roomId] = io.of('/').in().adapter.rooms[roomId];
+	if (typeof registeredRooms[roomId] === 'undefined') {
+		let room = io.of('/').in().adapter.rooms[roomId];
+		room.nickName = getRoomName();
+		registeredRooms[roomId] = room;
+	}
 	socket.emit('joinedTable', {'tableId': roomId, 'tables': getRooms()});
 	updateRoomsBroadcast(socket);
 }
@@ -97,4 +101,8 @@ function leaveRoom(socket, io) {
 
 function generateId() {
 	return uuid.v4();
+}
+
+function getRoomName() {
+	return ["Sanderau", "Grombühl", "Zellerau", "Frauenland", "Lengfeld", "Rottenbauer", "Heuchelhof", "Steinbachtal"][Object.keys(registeredRooms).length];
 }
