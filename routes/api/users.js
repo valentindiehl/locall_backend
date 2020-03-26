@@ -50,13 +50,13 @@ router.post('/landing', auth.optional, (req, res, next) => {
                     res.json({message: "Success. Please check E-mail"});
                 })
                 .catch((err) => {
-                    res.status(500);
+                    res.status(200);
                     console.log(err);
                     res.json(({message: err.message}));
                 });
         })
         .catch((err) => {
-            res.status(500);
+            res.status(200);
             console.log(err);
             res.json(({message: err.message}));
         })
