@@ -104,5 +104,7 @@ function generateId() {
 }
 
 function getRoomName() {
-	return ["Sanderau", "Grombühl", "Zellerau", "Frauenland", "Lengfeld", "Rottenbauer", "Heuchelhof", "Steinbachtal"][Object.keys(registeredRooms).length];
+	const chosenNames = Object.values(registeredRooms).map(r => r.nickName);
+	const difference = ["Allgemein", "Design", "Tech", "Social Media", "Gastro", "Publicity", "Off Topic", "Hackathon"].filter(x => !chosenNames.includes(x));
+	return difference[0];
 }
