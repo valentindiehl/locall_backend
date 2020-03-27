@@ -14,16 +14,14 @@ require('dotenv').config();
 const isProduction = process.env.NODE_ENV === 'debug';
 const app = express();
 var server = require('http').Server(app);
-const io = require('socket.io')(server);
-
 
 app.use(cors({
-  origin: [
-    `${process.env.FRONT_URL}`,
-    'http://localhost:3000',
-    'https://mypage.com',
-  ],
-  credentials: true
+	origin: [
+		`${process.env.FRONT_URL}`,
+		'http://localhost:3000',
+		'https://mypage.com',
+	],
+	credentials: true
 }));
 app.use(cookieParser());
 app.use(require('morgan')('dev'));
@@ -38,7 +36,7 @@ if (!isProduction) {
 
 var mongoDB = process.env.MONGODB_URI;
 var options = {
-  useNewUrlParser: true
+	useNewUrlParser: true
 };
 
 mongoose.connect(mongoDB, options);
@@ -49,37 +47,48 @@ require('./models/businesses');
 require('./config/passport');
 app.use("/", require('./routes'));
 
-if(!isProduction) {
-  app.use((err, req, res, next) => {
-    res.status(err.status || 500);
+if (!isProduction) {
+	app.use((err, req, res) => {
+		res.status(err.status || 500);
 
-    res.json({
-      errors: {
-        message: err.message,
-        error: err,
-      },
-    });
-  });
+		res.json({
+			errors: {
+				message: err.message,
+				error: err,
+			},
+		});
+	});
 }
 
-app.use((err, req, res, next) => {
-  res.status(err.status || 500);
+app.use((err, req, res) => {
+	res.status(err.status || 500);
 
-  res.json({
-    errors: {
-      message: err.message,
-      error: {},
-    },
-  });
+	res.json({
+		errors: {
+			message: err.message,
+			error: {},
+		},
+	});
 });
+
+// socket.io handling
+const io = require('socket.io')(server);
+
+const roomHandler = require('./handlers/RoomHandler');
+const signalHandler = require('./handlers/SignalHandler');
+
 // IO Events
 
 io.on('connection', function (socket) {
-	console.log("New Connection!");
-	socket.on('message', function () {
-		// TODO
+	console.log('New client!', socket.id);
+	roomHandler.init(io, socket);
+	signalHandler.init(io, socket);
+
+	socket.on('disconnect', function () {
+		console.log('Client left!', socket.id);
+		roomHandler.handleDisconnect(io, socket);
 	});
-});
+})
 
 server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
 
