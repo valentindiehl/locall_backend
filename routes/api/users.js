@@ -84,10 +84,30 @@ router.post('/', auth.optional, (req, res, next) => {
     const finalUser = new Users(user);
 
     finalUser.setPassword(user.password);
-    finalUser.generateOptInToken(user.email);
+    const OptToken = finalUser.generateOptInToken(user.email);
 
     return finalUser.save()
-        .then(() => res.json({ message: "E-Mail-Verification required. Message sent." }));
+        .then(() => {
+            console.log(user.optInToken);
+            axios.post('https://api.sendinblue.com/v3/smtp/email', {
+                to: [
+                    {
+                        email: user.email,
+                        name: user.name,
+                    }
+                ],
+                templateId: 1,
+                params: {
+                    firstname: user.name,
+                    link: "https://localhost:3000/verify-email/" + OptToken
+                }
+            }, {
+                headers: {
+                    "api-key": process.env.SENDINBLUE_KEY
+                }
+            }).then((data) =>  res.json({ message: "E-Mail-Verification required. Message sent." })
+            ).catch((err) => res.status(500).json({ message: "registration failed.", code: err}));
+        });
 });
 
 router.get('/verifyEmail', auth.optional, (req, res, next) => {
@@ -101,7 +121,7 @@ router.get('/verifyEmail', auth.optional, (req, res, next) => {
             console.log('succesfully updated user');
             console.log(user);
 
-            res.send(user);
+            return res.send(user);
         });
     });
 });
@@ -134,7 +154,14 @@ router.post('/login', auth.optional, (req, res, next) => {
         }
 
         if(passportUser) {
+
             const user = passportUser;
+            if (!user.isOptedIn) {
+                return res.status(403).json({
+                    message: "Bitte bestätige zuerst deine E-Mail!"
+                })
+            }
+
             user.token = passportUser.generateJWT();
             res.cookie('token', user.token, { httpOnly: true });
             return res.json({ user: user.toAuthJSON() });
