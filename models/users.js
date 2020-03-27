@@ -29,6 +29,7 @@ UsersSchema.methods.generateOptInToken = function(email) {
     this.isOptedIn = false;
     this.optInToken = crypto.createHash('sha1').update(seed + email).digest('hex');
     console.log(this.optInToken);
+    return this.optInToken;
 };
 
 UsersSchema.methods.generateJWT = function() {
