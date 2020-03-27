@@ -13,9 +13,6 @@ const cookieParser = require('cookie-parser');
 const isProduction = process.env.NODE_ENV === 'production';
 const app = express();
 var server = require('http').Server(app);
-const io = require('socket.io')(server);
-
-const roomHandler = require('./handlers/RoomHandler');
 
 app.use(cors({
 	origin: [
@@ -50,7 +47,7 @@ require('./config/passport');
 app.use(require('./routes'));
 
 if (!isProduction) {
-	app.use((err, req, res, next) => {
+	app.use((err, req, res) => {
 		res.status(err.status || 500);
 
 		res.json({
@@ -62,7 +59,7 @@ if (!isProduction) {
 	});
 }
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
 	res.status(err.status || 500);
 
 	res.json({
@@ -73,9 +70,16 @@ app.use((err, req, res, next) => {
 	});
 });
 
+// socket.io handling
+const io = require('socket.io')(server);
+
+const roomHandler = require('./handlers/RoomHandler');
+const signalHandler = require('./handlers/SignalHandler');
+
 io.on('connection', function (socket) {
 	console.log('New client!', socket.id);
 	roomHandler.init(io, socket);
+	signalHandler.init(io, socket);
 
 	socket.on('disconnect', function () {
 		console.log('Client left!', socket.id);
