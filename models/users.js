@@ -6,6 +6,10 @@ const { Schema } = mongoose;
 
 const UsersSchema = new Schema({
     email: String,
+    name: String,
+    city: String,
+    optInToken: String,
+    isOptedIn: Boolean,
     hash: String,
     salt: String,
 });
@@ -18,6 +22,13 @@ UsersSchema.methods.setPassword = function(password) {
 UsersSchema.methods.validatePassword = function(password) {
     const hash = crypto.pbkdf2Sync(password, this.salt, 10000, 512, 'sha512').toString('hex');
     return this.hash === hash;
+};
+
+UsersSchema.methods.generateOptInToken = function(email) {
+    const seed = crypto.randomBytes(20);
+    this.isOptedIn = false;
+    this.optInToken = crypto.createHash('sha1').update(seed + email).digest('hex');
+    console.log(this.optInToken);
 };
 
 UsersSchema.methods.generateJWT = function() {
@@ -39,5 +50,4 @@ UsersSchema.methods.toAuthJSON = function() {
         token: this.generateJWT(),
     };
 };
-
 mongoose.model('Users', UsersSchema);

@@ -1,0 +1,32 @@
+{
+  "data": [
+    {
+      "id": 1,
+      "name": "55 Eleven",
+      "address": "Amalienstraße 55",
+      "message": "Hier steht eine Testnachricht, die noch eingefügt werden muss.",
+      "type": "bar",
+      "coordinates": {
+        "lat": 11.577796,
+        "lon": 48.149586
+      },
+      "image_url": "https://cdn.eventinc.de/provider_pictures/pictures/000/097/081/cropped/eventlocation-55eleven-muenchen.jpg?1553266048",
+      "donation_counter": 0,
+      "supporter_counter": 0
+    },
+    {
+      "id": 2,
+      "name": "Das Edelweiß",
+      "address": "Edelweißstraße 10",
+        "message": "Hier steht eine Testnachricht, die noch eingefügt werden muss.",
+      "type": "restaurant",
+      "coordinates": {
+        "lat": 11.581594,
+        "lon": 48.118522
+      },
+      "image_url": "https://muenchen.mitvergnuegen.com/wp-content/uploads/sites/3/2018/07/pasted-image-0-1000x667.jpg",
+      "donation_counter": 0,
+      "supporter_counter": 0
+    }
+  ]
+}

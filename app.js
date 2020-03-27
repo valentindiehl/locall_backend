@@ -4,13 +4,14 @@ const bodyParser = require('body-parser');
 const session = require('express-session');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const AutoIncrement = require('mongoose-sequence')(mongoose);
 const errorHandler = require('errorhandler');
 const fs = require('fs');
-const certFileBuf = fs.readFileSync('./rds-combined-ca-bundle.pem');
 const cookieParser = require('cookie-parser');
+const { Schema } = mongoose;
+require('dotenv').config();
 
-
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = process.env.NODE_ENV === 'debug';
 const app = express();
 var server = require('http').Server(app);
 
@@ -33,8 +34,7 @@ if (!isProduction) {
 	app.use(errorHandler());
 }
 
-var dev_db_url = "mongodb://localhost/locall_dev";
-var mongoDB = process.env.MONGODB_URI || dev_db_url;
+var mongoDB = process.env.MONGODB_URI;
 var options = {
 	useNewUrlParser: true
 };
@@ -42,9 +42,10 @@ var options = {
 mongoose.connect(mongoDB, options);
 mongoose.promise = global.Promise;
 mongoose.set('debug', true);
-require('./models/Users');
+require('./models/users');
+require('./models/businesses');
 require('./config/passport');
-app.use(require('./routes'));
+app.use("/", require('./routes'));
 
 if (!isProduction) {
 	app.use((err, req, res) => {
@@ -75,6 +76,8 @@ const io = require('socket.io')(server);
 
 const roomHandler = require('./handlers/RoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
+
+// IO Events
 
 io.on('connection', function (socket) {
 	console.log('New client!', socket.id);
