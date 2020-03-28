@@ -18,7 +18,7 @@
       "id": 2,
       "name": "Das Edelweiß",
       "address": "Edelweißstraße 10",
-        "message": "Hier steht eine Testnachricht, die noch eingefügt werden muss.",
+      "message": "Hier steht eine Testnachricht, die noch eingefügt werden muss.",
       "type": "restaurant",
       "coordinates": {
         "lat": 11.581594,

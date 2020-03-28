@@ -26,6 +26,17 @@ router.get('/', auth.optional, (req, res, next) => {
     })
 });
 
+router.get('/:id', auth.optional, (req, res, next) => {
+    Businesses.findOne({id: req.params.id}, (err, business) => {
+        if (err)
+        {
+            console.log(err);
+            return res.status(404);
+        }
+        return res.json(business);
+    });
+})
+
 router.get('/geojson', auth.optional, (req, res, next) => {
     Businesses.find({}, (err, businesses) => {
         let geojson = {
