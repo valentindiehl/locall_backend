@@ -22,7 +22,8 @@ router.get('/', auth.optional, (req, res, next) => {
             businessList["data"].push(business);
         });
 
-        res.json(businessList);
+        res.status(200).json(businessList);
+        console.log(res);
     })
 });
 
