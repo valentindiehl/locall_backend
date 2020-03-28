@@ -31,7 +31,7 @@ router.get('/geojson', auth.optional, (req, res, next) => {
                 },
                 properties: {
                     title: business.name,
-                    id: business.name,
+                    id: business.id,
                     icon: business.type
                 }
             });
