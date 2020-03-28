@@ -82,33 +82,44 @@ router.post('/', auth.optional, (req, res, next) => {
         });
     }
 
-    const finalUser = new Users(user);
+    Users.findOne({email: user.email}, (err, matchingUser) => {
+        if (err)
+        {
+            console.log(err);
+        }
+        if (matchingUser != null)
+        {
+            console.log("Duplicate user... doing nothing");
+            return res.json({ message: "E-Mail-Verification required. Message sent." });
+        }
+        const finalUser = new Users(user);
 
-    finalUser.setPassword(user.password);
-    const OptToken = finalUser.generateOptInToken(user.email);
+        finalUser.setPassword(user.password);
+        const OptToken = finalUser.generateOptInToken(user.email);
 
-    return finalUser.save()
-        .then(() => {
-            console.log(user.optInToken);
-            axios.post('https://api.sendinblue.com/v3/smtp/email', {
-                to: [
-                    {
-                        email: user.email,
-                        name: user.name,
+        return finalUser.save()
+            .then(() => {
+                console.log(user.optInToken);
+                axios.post('https://api.sendinblue.com/v3/smtp/email', {
+                    to: [
+                        {
+                            email: user.email,
+                            name: user.name,
+                        }
+                    ],
+                    templateId: 1,
+                    params: {
+                        firstname: user.name,
+                        link: process.env.FRONT_URL + "/verify-email/" + OptToken
                     }
-                ],
-                templateId: 1,
-                params: {
-                    firstname: user.name,
-                    link: "https://localhost:3000/verify-email/" + OptToken
-                }
-            }, {
-                headers: {
-                    "api-key": process.env.SENDINBLUE_KEY
-                }
-            }).then((data) =>  res.json({ message: "E-Mail-Verification required. Message sent." })
-            ).catch((err) => res.status(500).json({ message: "registration failed.", code: err}));
-        });
+                }, {
+                    headers: {
+                        "api-key": process.env.SENDINBLUE_KEY
+                    }
+                }).then((data) =>  res.json({ message: "E-Mail-Verification required. Message sent." })
+                ).catch((err) => res.status(500).json({ message: "registration failed.", code: err}));
+            });
+    });
 });
 
 router.get('/verifyEmail', auth.optional, (req, res, next) => {
@@ -157,6 +168,7 @@ router.post('/login', auth.optional, (req, res, next) => {
         if(passportUser) {
 
             const user = passportUser;
+            console.log(user);
             if (!user.isOptedIn) {
                 return res.status(403).json({
                     message: "Bitte bestätige zuerst deine E-Mail!"
