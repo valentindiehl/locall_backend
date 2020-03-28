@@ -186,6 +186,40 @@ router.post('/login', auth.optional, (req, res, next) => {
     })(req, res, next);
 });
 
+router.post('/resetPassword', auth.optional, (req, res) => {
+    const { body: {user} } = req;
+    Users.findOne({email: user.email}, function(err, user) {
+        if (err)
+        {
+            console.log(err);
+            return res.status(500).json({ message: "Internal error. Please try again later."});
+        }
+        if (user != null) {
+            const token = user.generatePasswordResetToken();
+            user.save()
+                .then(() => {
+                    axios.post('https://api.sendinblue.com/v3/smtp/email', {
+                        to: [
+                            {
+                                email: user.email,
+                                name: user.name,
+                            }
+                        ],
+                        templateId: 2,
+                        params: {
+                            link: process.env.FRONT_URL + "/reset-password/" + token
+                        }
+                    }, {
+                        headers: {
+                            "api-key": process.env.SENDINBLUE_KEY
+                        }
+                    }).catch((err) => res.status(500).json({message: "reset failed.", code: err}));
+                });
+        }
+        return res.status(200).json({ message: "If email is registered, you will receive instructions soon via mail."});
+    })
+});
+
 router.get('/current', auth.required, (req, res, next) => {
     const {payload: {id}} = req;
 

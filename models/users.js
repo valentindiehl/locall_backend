@@ -10,6 +10,8 @@ const UsersSchema = new Schema({
     city: String,
     optInToken: String,
     isOptedIn: Boolean,
+    resetPasswordToken: String,
+    resetPasswordExpires: Date,
     hash: String,
     salt: String,
 });
@@ -31,6 +33,14 @@ UsersSchema.methods.generateOptInToken = function(email) {
     console.log(this.optInToken);
     return this.optInToken;
 };
+
+UsersSchema.methods.generatePasswordResetToken = function() {
+    const seed = crypto.randomBytes(20);
+    this.resetPasswordToken = crypto.createHash('sha1').update(seed).digest('hex');
+    this.resetPasswordExpires = Date.now() + 86400000;
+
+    return this.resetPasswordToken;
+}
 
 UsersSchema.methods.generateJWT = function() {
     const today = new Date();
