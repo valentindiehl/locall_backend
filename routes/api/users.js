@@ -63,10 +63,10 @@ router.post('/landing', auth.optional, (req, res, next) => {
 });
 
 router.post('/', auth.optional, (req, res, next) => {
-    const { body: { user } } = req;
-    console.log(req.body);
+    const {body: {user}} = req;
 
-    if(!user.email) {
+
+    if (!user.email) {
         return res.status(422).json({
             errors: {
                 email: 'is required',
@@ -74,7 +74,7 @@ router.post('/', auth.optional, (req, res, next) => {
         });
     }
 
-    if(!user.password) {
+    if (!user.password) {
         return res.status(422).json({
             errors: {
                 password: 'is required',
@@ -83,14 +83,12 @@ router.post('/', auth.optional, (req, res, next) => {
     }
 
     Users.findOne({email: user.email}, (err, matchingUser) => {
-        if (err)
-        {
+        if (err) {
             console.log(err);
         }
-        if (matchingUser != null)
-        {
+        if (matchingUser != null) {
             console.log("Duplicate user... doing nothing");
-            return res.json({ message: "E-Mail-Verification required. Message sent." });
+            return res.json({message: "E-Mail-Verification required. Message sent."});
         }
         const finalUser = new Users(user);
 
@@ -99,7 +97,6 @@ router.post('/', auth.optional, (req, res, next) => {
 
         return finalUser.save()
             .then(() => {
-                console.log(user.optInToken);
                 axios.post('https://api.sendinblue.com/v3/smtp/email', {
                     to: [
                         {
@@ -116,15 +113,17 @@ router.post('/', auth.optional, (req, res, next) => {
                     headers: {
                         "api-key": process.env.SENDINBLUE_KEY
                     }
-                }).then((data) =>  res.json({ message: "E-Mail-Verification required. Message sent." })
-                ).catch((err) => res.status(500).json({ message: "registration failed.", code: err}));
+                }).then((data) => res.json({message: "E-Mail-Verification required. Message sent."})
+                ).catch((err) => res.status(500).json({message: "registration failed.", code: err}));
             });
     });
 });
 
 router.get('/verifyEmail', auth.optional, (req, res, next) => {
-    Users.findOne({ optInToken: req.query.token }, function(err, user) {
-        if (err) { return console.error(err); }
+    Users.findOne({optInToken: req.query.token}, function (err, user) {
+        if (err) {
+            return console.error(err);
+        }
         console.dir(user);
 
         user.isOptedIn = true;
@@ -139,11 +138,10 @@ router.get('/verifyEmail', auth.optional, (req, res, next) => {
 });
 
 router.post('/login', auth.optional, (req, res, next) => {
-    const { body: { user } } = req;
+    const {body: {user}} = req;
 
-    console.log(req.body);
 
-    if(!user.email) {
+    if (!user.email) {
         return res.status(422).json({
             errors: {
                 email: 'is required',
@@ -151,7 +149,7 @@ router.post('/login', auth.optional, (req, res, next) => {
         });
     }
 
-    if(!user.password) {
+    if (!user.password) {
         return res.status(422).json({
             errors: {
                 password: 'is required',
@@ -159,16 +157,16 @@ router.post('/login', auth.optional, (req, res, next) => {
         });
     }
 
-    return passport.authenticate('local', { session: false }, (err, passportUser, info) => {
-        if(err) {
+    return passport.authenticate('local', {session: false}, (err, passportUser, info) => {
+        if (err) {
             console.log(err);
             return next(err);
         }
 
-        if(passportUser) {
+        if (passportUser) {
 
             const user = passportUser;
-            console.log(user);
+
             if (!user.isOptedIn) {
                 return res.status(403).json({
                     message: "Bitte bestätige zuerst deine E-Mail!"
@@ -176,8 +174,8 @@ router.post('/login', auth.optional, (req, res, next) => {
             }
 
             user.token = passportUser.generateJWT();
-            res.cookie('token', user.token, { httpOnly: true });
-            return res.json({ user: user.toAuthJSON() });
+            res.cookie('token', user.token, {httpOnly: true});
+            return res.json({user: user.toAuthJSON()});
         }
 
         return res.status(400).json({
@@ -189,26 +187,26 @@ router.post('/login', auth.optional, (req, res, next) => {
 });
 
 router.get('/current', auth.required, (req, res, next) => {
-    const { payload: { id } } = req;
+    const {payload: {id}} = req;
 
     return Users.findById(id)
         .then((user) => {
-            if(!user) {
+            if (!user) {
                 return res.sendStatus(400);
             }
 
-            return res.json({ user: user.toAuthJSON() });
+            return res.json({user: user.toAuthJSON()});
         });
 });
 
 router.get('/logout', auth.optional, (req, res, next) => {
-   res.clearCookie('token');
-   return res.json({ message: 'Logged out'});
+    res.clearCookie('token');
+    return res.json({message: 'Logged out'});
 });
 
 router.get('/check', auth.required, (req, res, next) => {
     console.log("Check successful");
-   res.sendStatus(200);
+    res.sendStatus(200);
 });
 
 module.exports = router;
