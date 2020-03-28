@@ -31,9 +31,13 @@ router.get('/:id', auth.optional, (req, res, next) => {
         if (err)
         {
             console.log(err);
-            return res.status(404);
+            return res.status(500).json({ 'error': 'Internal server error. Please try again later.'});
         }
-        return res.json(business);
+        if (business != null)
+        {
+            return res.json(business);
+        }
+        return res.status(404).json({ 'error': 'Could not find business with this ID.'});
     });
 })
 
