@@ -12,6 +12,10 @@ router.post('/', auth.optional, (req, res, next) => {
 
 router.get('/', auth.optional, (req, res, next) => {
     Businesses.find({}, (err, businesses) => {
+        if (err)
+        {
+            res.status(500).json({ 'message': "Internal error. Try again later."})
+        }
         let businessList = {};
         businessList["data"] = [];
         console.log(businesses);
@@ -19,7 +23,8 @@ router.get('/', auth.optional, (req, res, next) => {
             businessList["data"].push(business);
         });
 
-        res.json(businessList);
+        res.status(200).json(businessList);
+        console.log(res);
     })
 });
 
