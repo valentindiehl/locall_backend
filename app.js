@@ -16,10 +16,7 @@ const app = express();
 var server = require('http').Server(app);
 
 app.use(cors({
-	origin: [
-		process.env.FRONT_URL,
-		'http://localhost:3000'
-	],
+	origin: process.env.FRONT_URL,
 	credentials: true
 }));
 app.use(cookieParser());
@@ -33,14 +30,6 @@ if (!isProduction) {
 	app.use(errorHandler());
 }
 
-var mongoDB = process.env.MONGODB_URI;
-var options = {
-	useNewUrlParser: true
-};
-
-mongoose.connect(mongoDB, options);
-mongoose.promise = global.Promise;
-mongoose.set('debug', true);
 require('./models/users');
 require('./models/businesses');
 require('./config/passport');
@@ -87,8 +76,25 @@ io.on('connection', function (socket) {
 		console.log('Client left!', socket.id);
 		roomHandler.handleDisconnect(io, socket);
 	});
-})
+});
 
-server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
+server.on('ready', function() {
+	server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
+});
+
+const mongoDB = process.env.MONGODB_URI;
+const options = {
+	useNewUrlParser: true,
+	reconnectTries: Number.MAX_VALUE,
+	reconnectInterval: 500,
+	connectTimeoutMS: 10000,
+};
+
+mongoose.connect(mongoDB, options);
+mongoose.promise = global.Promise;
+mongoose.set('debug', true);
+mongoose.connection.once('open', function() {
+	server.emit('ready');
+});
 
 

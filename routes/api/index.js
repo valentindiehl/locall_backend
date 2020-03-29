@@ -17,8 +17,8 @@ router.get('/geojson', auth.optional, (req, res, next) => {
                 features: []
             }
         };
-        businesses.forEach(function(business) {
-            console.log(business);
+        businesses.forEach(function (business) {
+
             geojson["data"]["features"].push({
                 type: "Feature",
                 geometry: {
