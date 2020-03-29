@@ -139,8 +139,6 @@ router.get('/verifyEmail', auth.optional, (req, res, next) => {
 
 router.post('/login', auth.optional, (req, res, next) => {
     const {body: {user}} = req;
-    console.log(user);
-
 
     if (!user.email) {
         return res.status(422).json({
@@ -176,6 +174,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 
             user.token = passportUser.generateJWT();
             res.cookie('token', user.token, {httpOnly: true});
+
             return res.json({user: user.toAuthJSON()});
         }
         console.log("No passport user");
@@ -254,7 +253,7 @@ router.get('/current', auth.required, (req, res, next) => {
         });
 });
 
-router.get('/logout', auth.optional, (req, res, next) => {
+router.get('/logout', auth.required, (req, res) => {
     res.clearCookie('token');
     return res.json({message: 'Logged out'});
 });
@@ -279,7 +278,6 @@ router.get('/profile', auth.required, (req, res) => {
 });
 
 router.get('/check', auth.optional, (req, res, next) => {
-    console.log(req);
     console.log("Check successful");
     res.sendStatus(200);
 });
