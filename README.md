@@ -26,10 +26,17 @@ Den package manager [npm](https://www.npmjs.com) für die Installation benutzen.
 
 ```bash
 npm install
+
+# Mac
+brew install redis
+
+# Linux
+sudo apt-get install redis-server
 ```
 
 ## Anwendung starten
 
 ```bash
+redis-server
 npm start
 ```
