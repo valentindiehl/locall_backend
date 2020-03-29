@@ -2,7 +2,7 @@ const jwt = require('express-jwt');
 
 const getTokenFromCookie = (req) => {
     return req.cookies.token;
-}
+};
 
 const getTokenFromHeaders = (req) => {
     const { headers: { authorization } } = req;
