@@ -40,7 +40,7 @@ UsersSchema.methods.generatePasswordResetToken = function() {
     this.resetPasswordExpires = Date.now() + 86400000;
 
     return this.resetPasswordToken;
-}
+};
 
 UsersSchema.methods.generateJWT = function() {
     const today = new Date();
@@ -52,7 +52,7 @@ UsersSchema.methods.generateJWT = function() {
         id: this._id,
         exp: parseInt(expirationDate.getTime() / 1000, 10),
     }, 'secret');
-}
+};
 
 UsersSchema.methods.toAuthJSON = function() {
     return {

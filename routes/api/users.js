@@ -278,7 +278,8 @@ router.get('/profile', auth.required, (req, res) => {
         });
 });
 
-router.get('/check', auth.required, (req, res, next) => {
+router.get('/check', auth.optional, (req, res, next) => {
+    console.log(req);
     console.log("Check successful");
     res.sendStatus(200);
 });
