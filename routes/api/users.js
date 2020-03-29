@@ -220,6 +220,26 @@ router.post('/resetPassword', auth.optional, (req, res) => {
     })
 });
 
+router.post('/setPassword', auth.optional, (req, res) => {
+    const {body: {user}} = req;
+
+    Users.findOne({resetPasswordToken: user.token}, function(err, matchingUser) {
+       if (err) return res.status(500).json({message: "Internal error. Please try again later.", code: err});
+
+       if (user == null) return res.status(409).json({message: "User not found."});
+
+       if (matchingUser.resetPasswordExpires <= Date.now()) return res.status(420).json({ message: "Link expired. Please start password reset flow again."});
+
+       if (user.password === user.passwordVerification) {
+           matchingUser.setPassword(user.password);
+           matchingUser.resetPasswordExpires = Date.now();
+           matchingUser.resetPasswordToken = "";
+           matchingUser.save()
+               .then(() => res.status(200).json({message: "Password updated successfuly!"}));
+       } else return res.status(400).json({message: "Passwords did not match."});
+    });
+});
+
 router.get('/current', auth.required, (req, res, next) => {
     const {payload: {id}} = req;
 
