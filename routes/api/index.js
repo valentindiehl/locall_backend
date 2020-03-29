@@ -32,7 +32,12 @@ router.get('/geojson', auth.optional, (req, res, next) => {
                 properties: {
                     title: business.name,
                     id: business.id,
-                    icon: business.type
+                    type: (business.type === "cafe" ? "Cafe" : (business.type === "bar" ? "Bar"  : (business.type === "restaurant" ? "Restaurant" : "Bakery"))),
+                    icon: {
+                        iconSize: [50, 50],
+                        iconAnchor: [25, 25],
+                        popupAnchor: [0, -25]
+                    }
                 }
             });
         });
