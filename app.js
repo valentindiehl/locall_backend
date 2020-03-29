@@ -8,9 +8,7 @@ const AutoIncrement = require('mongoose-sequence')(mongoose);
 const errorHandler = require('errorhandler');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-const {Schema} = mongoose;
-const redis = require('redis')
-let RedisStore = require('connect-redis')(session);
+const { Schema } = mongoose;
 require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'debug';
@@ -61,31 +59,8 @@ app.use((err, req, res) => {
 	});
 });
 
-// Redis Stuff
-let redisClient = redis.createClient({
-	host: 'localhost',
-	port: 6379,
-	password: process.env.REDIS_PASSWORD,
-	db: 1
-});
-
-redisClient.unref()
-redisClient.on('error', console.log);
-
-const sessionMiddleware = session({
-	store: new RedisStore({client: redisClient}),
-	secret: 'This is a super secret secret'
-});
-
 // socket.io handling
 const io = require('socket.io')(server);
-
-
-io.use(function (socket, next) {
-	sessionMiddleware(socket.request, socket.request.res || {}, next)
-});
-
-app.use(sessionMiddleware);
 
 const roomHandler = require('./handlers/RoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
@@ -94,8 +69,6 @@ const signalHandler = require('./handlers/SignalHandler');
 
 io.on('connection', function (socket) {
 	console.log('New client!', socket.id);
-	console.log("Session", socket.request.session.userId);
-
 	roomHandler.init(io, socket);
 	signalHandler.init(io, socket);
 
@@ -105,7 +78,7 @@ io.on('connection', function (socket) {
 	});
 });
 
-server.on('ready', function () {
+server.on('ready', function() {
 	server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
 });
 
@@ -120,7 +93,7 @@ const options = {
 mongoose.connect(mongoDB, options);
 mongoose.promise = global.Promise;
 mongoose.set('debug', true);
-mongoose.connection.once('open', function () {
+mongoose.connection.once('open', function() {
 	server.emit('ready');
 });
 
