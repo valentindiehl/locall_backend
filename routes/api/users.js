@@ -139,6 +139,7 @@ router.get('/verifyEmail', auth.optional, (req, res, next) => {
 
 router.post('/login', auth.optional, (req, res, next) => {
     const {body: {user}} = req;
+    console.log(user);
 
 
     if (!user.email) {
@@ -159,17 +160,17 @@ router.post('/login', auth.optional, (req, res, next) => {
 
     return passport.authenticate('local', {session: false}, (err, passportUser, info) => {
         if (err) {
-            console.log(err);
             return next(err);
         }
+        console.log(passportUser);
 
         if (passportUser) {
-
+            console.log("passport user");
             const user = passportUser;
 
             if (!user.isOptedIn) {
-                return res.status(403).json({
-                    message: "Bitte bestätige zuerst deine E-Mail!"
+                return res.status(400).json({
+                    message: "Login failed. Please check data."
                 })
             }
 
@@ -177,6 +178,7 @@ router.post('/login', auth.optional, (req, res, next) => {
             res.cookie('token', user.token, {httpOnly: true});
             return res.json({user: user.toAuthJSON()});
         }
+        console.log("No passport user");
 
         return res.status(400).json({
             error: {
@@ -223,20 +225,19 @@ router.post('/resetPassword', auth.optional, (req, res) => {
 router.post('/setPassword', auth.optional, (req, res) => {
     const {body: {user}} = req;
 
+    if (user.token === undefined) return res.status(400).json({ message: 'No token found. Please provide a valid reset token.'});
+
     Users.findOne({resetPasswordToken: user.token}, function(err, matchingUser) {
        if (err) return res.status(500).json({message: "Internal error. Please try again later.", code: err});
 
-       if (user == null) return res.status(409).json({message: "User not found."});
-
+       if (matchingUser == null) return res.status(404).json({message: "User not found."});
        if (matchingUser.resetPasswordExpires <= Date.now()) return res.status(420).json({ message: "Link expired. Please start password reset flow again."});
 
-       if (user.password === user.passwordVerification) {
-           matchingUser.setPassword(user.password);
-           matchingUser.resetPasswordExpires = Date.now();
-           matchingUser.resetPasswordToken = "";
-           matchingUser.save()
-               .then(() => res.status(200).json({message: "Password updated successfuly!"}));
-       } else return res.status(400).json({message: "Passwords did not match."});
+       matchingUser.setPassword(user.password);
+       matchingUser.resetPasswordExpires = Date.now();
+       matchingUser.resetPasswordToken = "";
+       matchingUser.save()
+           .then(() => res.status(200).json({message: "Password updated successfuly!"}));
     });
 });
 
@@ -256,6 +257,25 @@ router.get('/current', auth.required, (req, res, next) => {
 router.get('/logout', auth.optional, (req, res, next) => {
     res.clearCookie('token');
     return res.json({message: 'Logged out'});
+});
+
+router.get('/profile', auth.required, (req, res) => {
+    const {payload: {id}} = req;
+
+    return Users.findById(id)
+        .then((user) => {
+            if (!user) {
+                return res.sendStatus(400);
+            }
+
+            return res.json({
+                user: {
+                    email: user.email,
+                    id: user._id,
+                    name: user.name
+                }
+            })
+        });
 });
 
 router.get('/check', auth.required, (req, res, next) => {
