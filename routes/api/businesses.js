@@ -24,7 +24,6 @@ router.get('/', auth.optional, (req, res, next) => {
         });
 
         res.status(200).json(businessList);
-        console.log(res);
     })
 });
 
