@@ -3,7 +3,7 @@ const uuid = require('uuid');
 // TODO: Use namespaces for different cafes
 //  and change registeredRooms to object mapping from cafe to array of rooms
 const registeredRooms = {};
-
+const assignedIds = [];
 module.exports = {
 	init: function (io, socket) {
 		socket.on('requestTables', function () {
@@ -17,7 +17,8 @@ module.exports = {
 			}
 			leaveRoom(socket, io);
 			const roomId = generateId();
-			joinRoom(io, socket, roomId);
+			assignedIds.push(roomId);
+			socket.emit('addedTable', {tableId: roomId});
 		});
 
 		socket.on('joinTable', function (data) {
@@ -27,14 +28,20 @@ module.exports = {
 			}
 			const roomId = data.tableId;
 			const sockets = io.of('/').in().adapter.rooms[roomId];
-			if (typeof sockets === 'undefined' || sockets.length < 1) {
+			if (!assignedIds.includes(roomId) && (typeof sockets === 'undefined' || sockets.length < 1)) {
 				socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
 				return;
 			}
-			if (sockets.length >= 8) {
+			if (!!sockets && sockets.length >= 8) {
 				socket.emit('tableException', {message: 'This table is already full. Please choose another one!'});
 				return;
 			}
+
+			const index = assignedIds.indexOf(roomId);
+			if (index >= 0) {
+				assignedIds.splice(index, 1);
+			}
+
 			if (roomId === leaveRoom(socket, io)) {
 				// User clicked same room => do not join again and update others
 				updateRoomsBroadcast(socket);
@@ -70,8 +77,7 @@ function joinRoom(io, socket, roomId) {
 	socket.room = roomId;
 	socket.join(roomId);
 	if (typeof registeredRooms[roomId] === 'undefined') {
-		let room = io.of('/').in().adapter.rooms[roomId];
-		room.nickName = getRoomName();
+		const room = io.of('/').in().adapter.rooms[roomId];
 		registeredRooms[roomId] = room;
 	}
 	socket.emit('joinedTable', {'tableId': roomId, 'tables': getRooms()});
@@ -85,7 +91,7 @@ function leaveAndUpdateRooms(socket, io) {
 
 function leaveRoom(socket, io) {
 	const roomId = socket.room;
-	if (typeof roomId !== 'undefined') {
+	if (!!roomId) {
 		socket.room = null;
 		socket.leave(roomId);
 		let room = io.of('/').in().adapter.rooms[roomId];
@@ -97,14 +103,9 @@ function leaveRoom(socket, io) {
 		socket.emit('leftTable', getRooms());
 		return roomId;
 	}
+	return -1;
 }
 
 function generateId() {
 	return uuid.v4();
-}
-
-function getRoomName() {
-	const chosenNames = Object.values(registeredRooms).map(r => r.nickName);
-	const difference = ["Allgemein", "Design", "Tech", "Social Media", "Gastro", "Publicity", "Off Topic", "Hackathon"].filter(x => !chosenNames.includes(x));
-	return difference[0];
 }
