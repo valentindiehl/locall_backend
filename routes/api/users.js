@@ -174,8 +174,8 @@ router.post('/login', auth.optional, (req, res, next) => {
 
             user.token = passportUser.generateJWT();
             res.cookie('token', user.token, {httpOnly: true});
-
-            return res.json({user: user.toAuthJSON()});
+            res.cookie('test', 'BLUBS');
+            return res.cookie('test', 'BLUBS').json({user: user.toAuthJSON()});
         }
         console.log("No passport user");
 
@@ -277,7 +277,7 @@ router.get('/profile', auth.required, (req, res) => {
         });
 });
 
-router.get('/check', auth.optional, (req, res, next) => {
+router.get('/check', auth.required, (req, res) => {
     console.log("Check successful");
     res.sendStatus(200);
 });
