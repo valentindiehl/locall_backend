@@ -1,14 +1,20 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const session = require('express-session');
+const session = require('express-session')({
+	secret: 'sec',
+	cookie: {maxAge: 60000},
+	resave: true,
+	saveUninitialized: true
+});
+const sharedsession = require("express-socket.io-session");
 const cors = require('cors');
 const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
 const errorHandler = require('errorhandler');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
-const { Schema } = mongoose;
+const {Schema} = mongoose;
 require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'debug';
@@ -24,7 +30,7 @@ app.use(require('morgan')('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session({secret: 'sec', cookie: {maxAge: 60000}, resave: false, saveUninitialized: false}));
+app.use(session);
 
 if (!isProduction) {
 	app.use(errorHandler());
@@ -61,25 +67,28 @@ app.use((err, req, res) => {
 });
 
 // socket.io handling
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {'pingInterval': 5000});
 
 const roomHandler = require('./handlers/RoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
 
 // IO Events
+io.use(sharedsession(session, {
+	autoSave: true
+}));
 
 io.on('connection', function (socket) {
 	console.log('New client!', socket.id);
 	roomHandler.init(io, socket);
 	signalHandler.init(io, socket);
 
-	socket.on('disconnect', function () {
-		console.log('Client left!', socket.id);
+	socket.on('disconnect', function (reason) {
+		console.log('Client left!', socket.id, "because", reason);
 		roomHandler.handleDisconnect(io, socket);
 	});
 });
 
-server.on('ready', function() {
+server.on('ready', function () {
 	server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
 });
 
@@ -94,7 +103,7 @@ const options = {
 mongoose.connect(mongoDB, options);
 mongoose.promise = global.Promise;
 mongoose.set('debug', true);
-mongoose.connection.once('open', function() {
+mongoose.connection.once('open', function () {
 	server.emit('ready');
 });
 
