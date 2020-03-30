@@ -66,7 +66,7 @@ app.use((err, req, res) => {
 });
 
 // socket.io handling
-const io = require('socket.io')(server);
+const io = require('socket.io')(server, {'pingInterval': 5000});
 
 const roomHandler = require('./handlers/RoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
@@ -81,8 +81,8 @@ io.on('connection', function (socket) {
 	roomHandler.init(io, socket);
 	signalHandler.init(io, socket);
 
-	socket.on('disconnect', function () {
-		console.log('Client left!', socket.id);
+	socket.on('disconnect', function (reason) {
+		console.log('Client left!', socket.id, "because", reason);
 		roomHandler.handleDisconnect(io, socket);
 	});
 });
