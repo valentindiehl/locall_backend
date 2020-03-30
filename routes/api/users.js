@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('../auth');
 const Users = mongoose.model('Users');
+const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 
 router.post('/landing', auth.optional, (req, res, next) => {
@@ -246,7 +247,7 @@ router.put('/password', auth.required, (req, res) => {
    const {payload: {id}} = req;
    const {body: {user}} = req;
 
-   if (!user.password)
+   if (!user.password || !user.oldPassword)
    {
        return res.status(422).json({ message: "Password is missing!"})
    }
@@ -258,9 +259,13 @@ router.put('/password', auth.required, (req, res) => {
                console.log(err);
                return res.status(400).json({ message: "Bad request."})
            }
-           matchingUser.setPassword(user.password);
-           matchingUser.save()
-               .then(() => res.status(200).json({message: "Password updated correctly."}))
+           if (matchingUser.validatePassword(user.oldPassword))
+           {
+               matchingUser.setPassword(user.password);
+               matchingUser.save()
+                   .then(() => res.status(200).json({message: "Password updated correctly."}))
+           } else return res.status(401).json({message: "Not authorized."});
+
        })
 
 });
@@ -344,20 +349,21 @@ router.get('/profile', auth.required, (req, res) => {
                     }
                 })
             } else {
-                return res.json({
-                    user: {
-                        email: user.email,
-                        id: user._id,
-                        name: user.name,
-                    },
-                    business: {
-                        isBusiness: user.isBusiness,
-                        id: user.businessId
-                    }
-                })
+                Businesses.findOne({id: user.businessId}, function(err, matchingBusiness) {
+                    if (err) return res.status(500).json({message: "Internal error. Please try again later."});
+
+                    if (!matchingBusiness) return res.status(500).json({message: "Internal error. Please try again later."});
+
+                    return res.json({
+                        user: {
+                            email: user.email,
+                            id: user._id,
+                            name: user.name
+                        },
+                        business: matchingBusiness
+                    })
+                });
             }
-
-
         });
 });
 
