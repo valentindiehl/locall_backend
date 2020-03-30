@@ -44,7 +44,9 @@ router.put('/', auth.required, (req, res, next) => {
                {
                    return res.status(500).json({message: "Could not find your business. Please consult technical support"});
                }
-               if (business.paypal) matchingBusiness.paypal = business.paypal;
+               console.log("temp: " + business);
+               console.log("db: " + matchingBusiness);
+               if (business.paypal != null) matchingBusiness.paypal = business.paypal;
                if (business.description) matchingBusiness.message = business.description;
 
                matchingBusiness.save()
