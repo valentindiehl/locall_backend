@@ -21,7 +21,6 @@ router.post('/', auth.optional, (req, res) => {
         }
         if (matchingApplication != null) {
             console.log("Duplicate user... doing nothing");
-            return res.json({message: "E-Mail-Verification required. Message sent."});
         }
         const finalApplication = new Applications(application);
 
@@ -29,16 +28,17 @@ router.post('/', auth.optional, (req, res) => {
 
         return finalApplication.save()
             .then(() => {
+                console.log(finalApplication);
                 axios.post('https://api.sendinblue.com/v3/smtp/email', {
                     to: [
                         {
                             email: application.email,
-                            name: application.name,
+                            name: application.businessName,
                         }
                     ],
                     templateId: 3,
                     params: {
-                        businessName: application.name,
+                        businessName: application.businessName,
                         link: process.env.FRONT_URL + "/verify-application/" + OptToken
                     }
                 }, {
@@ -54,14 +54,15 @@ router.post('/', auth.optional, (req, res) => {
 router.get('/verifyEmail', auth.optional, (req, res, next) => {
     Applications.findOne({optInToken: req.query.token}, function (err, application) {
         if (err) {
-            return console.error(err);
+            return res.status(500).json({message: "Internal error. Please try again later."})
         }
+        if (!application) return res.status(304).json({message: "Already confirmed. No action required."});
 
+        console.log(application);
         application.isOptedIn = true;
         application.optInToken = "";
         application.save()
             .then(() => {
-                res.status(200).json(application);
                 axios.post('https://api.sendinblue.com/v3/smtp/email', {
                     to: [
                         {
@@ -69,16 +70,16 @@ router.get('/verifyEmail', auth.optional, (req, res, next) => {
                             name: "Das LOCALL Gastro-Team",
                         }
                     ],
-                    templateId: 3,
+                    templateId: 4,
                     params: {
-                        businessName: application.name,
-                        link: process.env.FRONT_URL + "/verify-application/" + OptToken
+                        businessName: application.businessName,
+                        email: application.email
                     }
                 }, {
                     headers: {
                         "api-key": process.env.SENDINBLUE_KEY
                     }
-                }).then((data) => res.json({message: "E-Mail-Verification required. Message sent."})
+                }).then((data) => res.json({message: "Verification complete. Message sent."})
                 ).catch((err) => res.status(500).json({message: "registration failed.", code: err}));
             })
     });
