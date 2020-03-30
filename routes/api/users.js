@@ -6,6 +6,14 @@ const Users = mongoose.model('Users');
 const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 
+router.get('/:id', auth.required, (req, res, next) => {
+	Users.findById(req.params.id)
+		.then(function(matchingUser) {
+			if (!matchingUser) return res.status(404).json({message: "User not found."});
+			return res.status(200).json({user: { name: matchingUser.name }});
+		});
+});
+
 router.post('/landing', auth.optional, (req, res, next) => {
 	const {body: {user}} = req;
 
