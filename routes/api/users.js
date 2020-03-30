@@ -10,18 +10,6 @@ router.use(passport.initialize());
 router.use(passport.session());
 
 
-router.get('/:id', auth.required, (req, res, next) => {
-	console.log(req.params.id);
-	Users.findById(req.params.id)
-		.then(function(matchingUser) {
-			if (!matchingUser) return res.status(404).json({message: "User not found."});
-			return res.status(200).json({user: { name: matchingUser.name }});
-		})
-		.catch(function(err) {
-			return res.status(500).json({message: "Could not find user."});
-		})
-});
-
 router.post('/landing', auth.optional, (req, res, next) => {
 	const {body: {user}} = req;
 
@@ -260,29 +248,26 @@ router.post('/setPassword', auth.optional, (req, res) => {
 });
 
 router.put('/password', auth.required, (req, res) => {
-   const {payload: {id}} = req;
-   const {body: {user}} = req;
+	const {payload: {id}} = req;
+	const {body: {user}} = req;
 
-   if (!user.password || !user.oldPassword)
-   {
-       return res.status(422).json({ message: "Password is missing!"})
-   }
+	if (!user.password || !user.oldPassword) {
+		return res.status(422).json({message: "Password is missing!"})
+	}
 
-   Users.findById(id)
-       .then(function( matchingUser) {
-           if (!matchingUser)
-           {
-               console.log(err);
-               return res.status(400).json({ message: "Bad request."})
-           }
-           if (matchingUser.validatePassword(user.oldPassword))
-           {
-               matchingUser.setPassword(user.password);
-               matchingUser.save()
-                   .then(() => res.status(200).json({message: "Password updated correctly."}))
-           } else return res.status(401).json({message: "Not authorized."});
+	Users.findById(id)
+		.then(function (matchingUser) {
+			if (!matchingUser) {
+				console.log(err);
+				return res.status(400).json({message: "Bad request."})
+			}
+			if (matchingUser.validatePassword(user.oldPassword)) {
+				matchingUser.setPassword(user.password);
+				matchingUser.save()
+					.then(() => res.status(200).json({message: "Password updated correctly."}))
+			} else return res.status(401).json({message: "Not authorized."});
 
-       })
+		})
 });
 
 router.put('/', auth.required, (req, res) => {
@@ -345,45 +330,56 @@ router.get('/logout', auth.required, (req, res) => {
 });
 
 router.get('/profile', auth.required, (req, res) => {
-    const {payload: {id}} = req;
+	const {payload: {id}} = req;
 
-    return Users.findById(id)
-        .then((user) => {
-            if (!user) {
-                return res.sendStatus(400);
-            }
+	return Users.findById(id)
+		.then((user) => {
+			if (!user) {
+				return res.sendStatus(400);
+			}
 
-            if (!user.isBusiness)
-            {
-                return res.json({
-                    user: {
-                        email: user.email,
-                        id: user._id,
-                        name: user.name,
-                    }
-                })
-            } else {
-                Businesses.findOne({id: user.businessId}, function(err, matchingBusiness) {
-                    if (err) return res.status(500).json({message: "Internal error. Please try again later."});
+			if (!user.isBusiness) {
+				return res.json({
+					user: {
+						email: user.email,
+						id: user._id,
+						name: user.name,
+					}
+				})
+			} else {
+				Businesses.findOne({id: user.businessId}, function (err, matchingBusiness) {
+					if (err) return res.status(500).json({message: "Internal error. Please try again later."});
 
-                    if (!matchingBusiness) return res.status(500).json({message: "Internal error. Please try again later."});
+					if (!matchingBusiness) return res.status(500).json({message: "Internal error. Please try again later."});
 
-                    return res.json({
-                        user: {
-                            email: user.email,
-                            id: user._id,
-                            name: user.name
-                        },
-                        business: matchingBusiness
-                    })
-                });
-            }
-        });
+					return res.json({
+						user: {
+							email: user.email,
+							id: user._id,
+							name: user.name
+						},
+						business: matchingBusiness
+					})
+				});
+			}
+		});
 });
 
 router.get('/check', auth.required, (req, res) => {
 	console.log("Check successful");
 	res.sendStatus(200);
+});
+
+router.get('/:id', auth.required, (req, res, next) => {
+	console.log(req.params.id);
+	Users.findById(req.params.id)
+		.then(function (matchingUser) {
+			if (!matchingUser) return res.status(404).json({message: "User not found."});
+			return res.status(200).json({user: {name: matchingUser.name}});
+		})
+		.catch(function (err) {
+			return res.status(500).json({message: "Could not find user."});
+		})
 });
 
 module.exports = router;
