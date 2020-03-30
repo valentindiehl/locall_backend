@@ -1,13 +1,7 @@
 const express = require('express');
 const path = require('path');
 const bodyParser = require('body-parser');
-const session = require('express-session')({
-	secret: 'sec',
-	cookie: {maxAge: 60000},
-	resave: true,
-	saveUninitialized: true
-});
-const sharedsession = require("express-socket.io-session");
+const session = require('express-session');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const AutoIncrement = require('mongoose-sequence')(mongoose);
@@ -15,6 +9,7 @@ const errorHandler = require('errorhandler');
 const fs = require('fs');
 const cookieParser = require('cookie-parser');
 const {Schema} = mongoose;
+const mongoStore = require('connect-mongo')(session);
 require('dotenv').config();
 
 const isProduction = process.env.NODE_ENV === 'debug';
@@ -25,12 +20,27 @@ app.use(cors({
 	origin: process.env.FRONT_URL,
 	credentials: true
 }));
+
+const sessionStore = new mongoStore({
+	mongooseConnection: mongoose.connection,
+	touchAfter: 24 * 3600
+});
+
+const sessionMware = session({
+	name: "locall.sess",
+	store: sessionStore,
+	secret: "Very secret secret",
+	resave: false,
+	saveUninitialized: true,
+	cookie: {maxAge: 1000 * 60 * 60 * 24}
+});
+
+app.use(sessionMware);
 app.use(cookieParser());
 app.use(require('morgan')('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
-app.use(session);
 
 if (!isProduction) {
 	app.use(errorHandler());
@@ -73,9 +83,9 @@ const roomHandler = require('./handlers/RoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
 
 // IO Events
-io.use(sharedsession(session, {
-	autoSave: true
-}));
+io.use(function (socket, next) {
+	sessionMware(socket.handshake, {}, next);
+});
 
 io.on('connection', function (socket) {
 	console.log('New client!', socket.id);

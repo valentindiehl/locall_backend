@@ -6,6 +6,9 @@ const Users = mongoose.model('Users');
 const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 
+router.use(passport.initialize());
+router.use(passport.session());
+
 router.post('/landing', auth.optional, (req, res, next) => {
 	const {body: {user}} = req;
 
