@@ -7,11 +7,15 @@ const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 
 router.get('/:id', auth.required, (req, res, next) => {
+	console.log(req.params.id);
 	Users.findById(req.params.id)
 		.then(function(matchingUser) {
 			if (!matchingUser) return res.status(404).json({message: "User not found."});
 			return res.status(200).json({user: { name: matchingUser.name }});
-		});
+		})
+		.catch(function(err) {
+			return res.status(500).json({message: "Could not find user."});
+		})
 });
 
 router.post('/landing', auth.optional, (req, res, next) => {
