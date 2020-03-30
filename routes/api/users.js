@@ -382,4 +382,16 @@ router.get('/:id', auth.required, (req, res, next) => {
 		})
 });
 
+router.delete('/', auth.required, (req, res) => {
+
+	Users.deleteOne({_id: req.payload.id}, function(err) {
+		if (err)
+		{
+			console.log(err);
+			res.status(401).json({message: "Not authorized."});
+		}
+		res.status(200).json({message: "User deleted. Process"});
+	});
+})
+
 module.exports = router;
