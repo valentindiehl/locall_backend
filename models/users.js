@@ -12,6 +12,8 @@ const UsersSchema = new Schema({
     isOptedIn: Boolean,
     resetPasswordToken: String,
     resetPasswordExpires: Date,
+    isBusiness: Boolean,
+    businessId: Number,
     hash: String,
     salt: String,
 });

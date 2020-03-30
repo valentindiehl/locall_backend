@@ -7,6 +7,7 @@ const Businesses = mongoose.model('Businesses');
 
 router.use('/users', require('./users'));
 router.use('/businesses', require('./businesses'));
+router.use('/applications', require('./applications'));
 
 router.get('/geojson', auth.optional, (req, res, next) => {
     Businesses.find({}, (err, businesses) => {

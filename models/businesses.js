@@ -7,12 +7,13 @@ const { Schema } = mongoose;
 const BusinessSchema = new Schema({
     name: String,
     type: String,
-    description: String,
+    message: String,
     address: String,
     coordinates: {
         lat: String,
         lon: String
     },
+    paypal: String,
     image_url: String,
     tables: [
         {

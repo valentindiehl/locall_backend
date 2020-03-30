@@ -93,6 +93,8 @@ router.post('/', auth.optional, (req, res, next) => {
 		const finalUser = new Users(user);
 
 		finalUser.setPassword(user.password);
+        finalUser.isBusiness = false;
+        finalUser.businessId = null;
 		const OptToken = finalUser.generateOptInToken(user.email);
 
 		return finalUser.save()
@@ -240,6 +242,71 @@ router.post('/setPassword', auth.optional, (req, res) => {
 	});
 });
 
+router.put('/password', auth.required, (req, res) => {
+   const {payload: {id}} = req;
+   const {body: {user}} = req;
+
+   if (!user.password)
+   {
+       return res.status(422).json({ message: "Password is missing!"})
+   }
+
+   Users.findById(id)
+       .then(function( matchingUser) {
+           if (!matchingUser)
+           {
+               console.log(err);
+               return res.status(400).json({ message: "Bad request."})
+           }
+           matchingUser.setPassword(user.password);
+           matchingUser.save()
+               .then(() => res.status(200).json({message: "Password updated correctly."}))
+       })
+
+});
+
+router.put('/', auth.required, (req, res) => {
+    const {payload: {id}} = req;
+    const {body: {user}} = req;
+
+    if (!user.email)
+    {
+        return res.status(422).json({ message: "email is missing!"})
+    }
+
+    Users.findById(id)
+        .then(function( matchingUser) {
+            if (!matchingUser)
+            {
+                console.log(err);
+                return res.status(400).json({ message: "Bad request."})
+            }
+            matchingUser.email = user.email;
+            const OptToken = matchingUser.generateOptInToken(user.email);
+            matchingUser.save()
+                .then(() => {
+                    axios.post('https://api.sendinblue.com/v3/smtp/email', {
+                        to: [
+                            {
+                                email: user.email,
+                                name: matchingUser.name,
+                            }
+                        ],
+                        templateId: 1,
+                        params: {
+                            firstname: matchingUser.name,
+                            link: process.env.FRONT_URL + "/verify-email/" + OptToken
+                        }
+                    }, {
+                        headers: {
+                            "api-key": process.env.SENDINBLUE_KEY
+                        }
+                    }).then((data) => res.json({message: "E-Mail-Verification required. Message sent."})
+                    ).catch((err) => res.status(500).json({message: "update failed.", code: err}));
+                })
+        })
+});
+
 router.get('/current', auth.required, (req, res, next) => {
 	const {payload: {id}} = req;
 
@@ -268,13 +335,30 @@ router.get('/profile', auth.required, (req, res) => {
 				return res.sendStatus(400);
 			}
 
+            if (!user.isBusiness)
+            {
+                return res.json({
+                    user: {
+                        email: user.email,
+                        id: user._id,
+                        name: user.name,
+                    }
+                })
+            } else {
 			return res.json({
 				user: {
 					email: user.email,
 					id: user._id,
-					name: user.name
+                        name: user.name,
+                    },
+                    business: {
+                        isBusiness: user.isBusiness,
+                        id: user.businessId
 				}
 			})
+            }
+
+
 		});
 });
 
