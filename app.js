@@ -78,7 +78,6 @@ io.use(sharedsession(session, {
 
 io.on('connection', function (socket) {
 	console.log('New client!', socket.id);
-	// If user is logged in, their ID is in socket.handshake.session.userId
 	roomHandler.init(io, socket);
 	signalHandler.init(io, socket);
 

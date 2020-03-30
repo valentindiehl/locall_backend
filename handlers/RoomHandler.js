@@ -1,4 +1,5 @@
 const uuid = require('uuid');
+const Users = require('mongoose').model("Users");
 
 // TODO: Use namespaces for different cafes
 //  and change registeredRooms to object mapping from cafe to array of rooms
@@ -7,7 +8,12 @@ const assignedIds = [];
 module.exports = {
 	init: function (io, socket) {
 		socket.on('requestTables', function () {
-			updateRoomsUnicast(socket);
+			socket.handshake.session.reload(function (err) {
+				console.log(err);
+				// TODO: Handle Error
+				updateRoomsUnicast(socket);
+				Users.findById(socket.handshake.session.userId).then(u => console.log(u, "requests table"));
+			});
 		});
 
 		socket.on('addTable', function () {
