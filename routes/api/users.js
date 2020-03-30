@@ -38,7 +38,7 @@ router.post('/landing', auth.optional, (req, res, next) => {
 		},
 	)
 		.then((data) => {
-			console.log("Addded user");
+			console.debug("Addded user");
 			let segment_id = user.type === 'user' ? "1812935" : "1812939";
 			axios.post('https://us19.api.mailchimp.com/3.0/lists/63f0ee09c6/segments/' + segment_id + '/members', {
 					email_address: user.email,
@@ -50,19 +50,19 @@ router.post('/landing', auth.optional, (req, res, next) => {
 					}
 				})
 				.then((data) => {
-					console.log("Addded user tags");
+					console.debug("Addded user tags");
 					res.status(200);
 					res.json({message: "Success. Please check E-mail"});
 				})
 				.catch((err) => {
 					res.status(200);
-					console.log(err);
+					console.debug(err);
 					res.json(({message: err.message}));
 				});
 		})
 		.catch((err) => {
 			res.status(200);
-			console.log(err);
+			console.debug(err);
 			res.json(({message: err.message}));
 		})
 });
@@ -89,10 +89,10 @@ router.post('/', auth.optional, (req, res, next) => {
 
 	Users.findOne({email: user.email}, (err, matchingUser) => {
 		if (err) {
-			console.log(err);
+			console.debug(err);
 		}
 		if (matchingUser != null) {
-			console.log("Duplicate user... doing nothing");
+			console.debug("Duplicate user... doing nothing");
 			return res.json({message: "E-Mail-Verification required. Message sent."});
 		}
 		const finalUser = new Users(user);
@@ -136,8 +136,8 @@ router.get('/verifyEmail', auth.optional, (req, res, next) => {
 		user.isOptedIn = true;
 		user.save(function (err) {
 			if (err) return console.error(err);
-			console.log('succesfully updated user');
-			console.log(user);
+			console.debug('succesfully updated user');
+			console.debug(user);
 
 			return res.send(user);
 		});
@@ -167,10 +167,10 @@ router.post('/login', auth.optional, (req, res, next) => {
 		if (err) {
 			return next(err);
 		}
-		console.log(passportUser);
+		console.debug(passportUser);
 
 		if (passportUser) {
-			console.log("passport user");
+			console.debug("passport user");
 			const user = passportUser;
 
 			if (!user.isOptedIn) {
@@ -185,7 +185,7 @@ router.post('/login', auth.optional, (req, res, next) => {
 			req.session.userId = user._id.toString();
 			return res.cookie('test', 'BLUBS').json({user: user.toAuthJSON()});
 		}
-		console.log("No passport user");
+		console.debug("No passport user");
 
 		return res.status(400).json({
 			error: {
@@ -199,7 +199,7 @@ router.post('/resetPassword', auth.optional, (req, res) => {
 	const {body: {user}} = req;
 	Users.findOne({email: user.email}, function (err, user) {
 		if (err) {
-			console.log(err);
+			console.debug(err);
 			return res.status(500).json({message: "Internal error. Please try again later."});
 		}
 		if (user != null) {
@@ -258,7 +258,7 @@ router.put('/password', auth.required, (req, res) => {
 	Users.findById(id)
 		.then(function (matchingUser) {
 			if (!matchingUser) {
-				console.log(err);
+				console.debug(err);
 				return res.status(400).json({message: "Bad request."})
 			}
 			if (matchingUser.validatePassword(user.oldPassword)) {
@@ -281,7 +281,7 @@ router.put('/', auth.required, (req, res) => {
 	Users.findById(id)
 		.then(function (matchingUser) {
 			if (!matchingUser) {
-				console.log(err);
+				console.debug(err);
 				return res.status(400).json({message: "Bad request."})
 			}
 			matchingUser.email = user.email;
@@ -366,12 +366,12 @@ router.get('/profile', auth.required, (req, res) => {
 });
 
 router.get('/check', auth.required, (req, res) => {
-	console.log("Check successful");
+	console.debug("Check successful");
 	res.sendStatus(200);
 });
 
 router.get('/:id', auth.required, (req, res, next) => {
-	console.log(req.params.id);
+	console.debug(req.params.id);
 	Users.findById(req.params.id)
 		.then(function (matchingUser) {
 			if (!matchingUser) return res.status(404).json({message: "User not found."});

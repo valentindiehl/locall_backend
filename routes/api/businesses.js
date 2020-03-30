@@ -20,7 +20,7 @@ router.get('/', auth.required, (req, res, next) => {
         }
         let businessList = {};
         businessList["data"] = [];
-        console.log(businesses);
+        console.debug(businesses);
         businesses.forEach(function (business) {
             businessList["data"].push(business);
         });
@@ -44,8 +44,8 @@ router.put('/', auth.required, (req, res, next) => {
                {
                    return res.status(500).json({message: "Could not find your business. Please consult technical support"});
                }
-               console.log("temp: " + business);
-               console.log("db: " + matchingBusiness);
+               console.debug("temp: " + business);
+               console.debug("db: " + matchingBusiness);
                if (business.paypal != null) matchingBusiness.paypal = business.paypal;
                if (business.description) matchingBusiness.message = business.description;
 
@@ -58,7 +58,7 @@ router.put('/', auth.required, (req, res, next) => {
 router.get('/:id', auth.required, (req, res, next) => {
     Businesses.findOne({id: req.params.id}, (err, business) => {
         if (err) {
-            console.log(err);
+            console.debug(err);
             return res.status(500).json({'error': 'Internal server error. Please try again later.'});
         }
         if (business != null) {

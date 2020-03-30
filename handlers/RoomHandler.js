@@ -180,11 +180,11 @@ function getRoomName(rooms) {
 function checkLogin(socket, callback) {
 	socket.handshake.session.reload(function (err) {
 		if (!!err) {
-			console.log(err);
+			console.debug(err);
 			return;
 		}
 		if (!socket.handshake.session.userId) {
-			console.log("User not logged in");
+			console.debug("User not logged in");
 			return;
 		}
 		callback(socket.handshake.session.userId);

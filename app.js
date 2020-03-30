@@ -88,18 +88,18 @@ io.use(function (socket, next) {
 });
 
 io.on('connection', function (socket) {
-	console.log('New client!', socket.id);
+	console.debug('New client!', socket.id);
 	roomHandler.init(io, socket);
 	signalHandler.init(io, socket);
 
 	socket.on('disconnect', function (reason) {
-		console.log('Client left!', socket.id, "because", reason);
+		console.debug('Client left!', socket.id, "because", reason);
 		roomHandler.handleDisconnect(io, socket);
 	});
 });
 
 server.on('ready', function () {
-	server.listen(8000, () => console.log('Server running on http://localhost:8000/'));
+	server.listen(8000, () => console.debug('Server running on http://localhost:8000/'));
 });
 
 const mongoDB = process.env.MONGODB_URI;
