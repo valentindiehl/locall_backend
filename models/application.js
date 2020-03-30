@@ -14,7 +14,7 @@ ApplicationsSchema.methods.generateOptInToken = function(email) {
     const seed = crypto.randomBytes(20);
     this.isOptedIn = false;
     this.optInToken = crypto.createHash('sha1').update(seed + email).digest('hex');
-    console.log(this.optInToken);
+    console.debug(this.optInToken);
     return this.optInToken;
 };
 

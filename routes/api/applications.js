@@ -17,10 +17,10 @@ router.post('/', auth.optional, (req, res) => {
 
     Applications.findOne({email: application.email}, (err, matchingApplication) => {
         if (err) {
-            console.log(err);
+            console.debug(err);
         }
         if (matchingApplication != null) {
-            console.log("Duplicate user... doing nothing");
+            console.debug("Duplicate user... doing nothing");
         }
         const finalApplication = new Applications(application);
 
@@ -28,7 +28,7 @@ router.post('/', auth.optional, (req, res) => {
 
         return finalApplication.save()
             .then(() => {
-                console.log(finalApplication);
+                console.debug(finalApplication);
                 axios.post('https://api.sendinblue.com/v3/smtp/email', {
                     to: [
                         {
@@ -58,7 +58,7 @@ router.get('/verifyEmail', auth.optional, (req, res, next) => {
         }
         if (!application) return res.status(304).json({message: "Already confirmed. No action required."});
 
-        console.log(application);
+        console.debug(application);
         application.isOptedIn = true;
         application.optInToken = "";
         application.save()

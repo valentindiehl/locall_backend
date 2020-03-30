@@ -1,8 +1,8 @@
 const jwt = require('express-jwt');
 
 const getTokenFromCookie = (req) => {
-    console.log(req.cookies);
-    console.log(req.signedCookies);
+    console.debug(req.cookies);
+    console.debug(req.signedCookies);
     return req.cookies.token;
 };
 
