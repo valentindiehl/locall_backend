@@ -82,10 +82,12 @@ function getRooms(companyId) {
 }
 
 function updateRoomsUnicast(socket, companyId) {
+	if (!companyId) return;
 	socket.emit('updateTables', getRooms(companyId));
 }
 
 function updateRoomsBroadcast(io, socket, companyId) {
+	if (!companyId) return;
 	socket.broadcast.emit('updateTables', getRooms(companyId));
 }
 
@@ -99,12 +101,13 @@ function joinRoom(io, socket, roomId, companyId, userId) {
 	if (!registeredRooms[companyId][roomId]) {
 		const room = io.of("/").in().adapter.rooms[roomId];
 		room.prefixName = getRoomName(Object.values(registeredRooms[companyId]));
-		room.participants = [userId]
+		room.participants = {}
+		room.participants[socket.id] = userId;
 		registeredRooms[companyId][roomId] = room;
 	} else {
-		registeredRooms[companyId][roomId].participants.push(userId);
+		registeredRooms[companyId][roomId].participants[socket.id] = userId;
 	}
-	socket.emit('joinedTable', {'tableId': roomId, 'tables': getRooms(companyId)});
+	socket.emit('joinedTable', {'tableId': roomId, 'tables': getRooms(companyId), 'myId': userId});
 	updateRoomsBroadcast(io, socket, companyId);
 }
 
@@ -119,6 +122,8 @@ function leaveRoom(socket, io, companyId) {
 	socket.companyId = null;
 	if (!!roomId) {
 		socket.leave(roomId);
+		const socketId = socket.id;
+		delete registeredRooms[companyId][roomId][socketId];
 		let room = io.of("/").in().adapter.rooms[roomId];
 		// Check if room is empty
 		if (typeof room === "undefined" && typeof registeredRooms[companyId][roomId] !== 'undefined') {
