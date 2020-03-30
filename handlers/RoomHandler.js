@@ -61,7 +61,7 @@ module.exports = {
 					// User clicked same room => do not join again and update others
 					updateRoomsBroadcast(io, socket, companyId);
 				} else {
-					joinRoom(io, socket, roomId, companyId);
+					joinRoom(io, socket, roomId, companyId, userId);
 				}
 			});
 		});
@@ -89,7 +89,7 @@ function updateRoomsBroadcast(io, socket, companyId) {
 	socket.broadcast.emit('updateTables', getRooms(companyId));
 }
 
-function joinRoom(io, socket, roomId, companyId) {
+function joinRoom(io, socket, roomId, companyId, userId) {
 	socket.room = roomId;
 	socket.companyId = companyId;
 	socket.join(roomId);
@@ -99,7 +99,10 @@ function joinRoom(io, socket, roomId, companyId) {
 	if (!registeredRooms[companyId][roomId]) {
 		const room = io.of("/").in().adapter.rooms[roomId];
 		room.prefixName = getRoomName(Object.values(registeredRooms[companyId]));
+		room.participants = [userId]
 		registeredRooms[companyId][roomId] = room;
+	} else {
+		registeredRooms[companyId][roomId].participants.push(userId);
 	}
 	socket.emit('joinedTable', {'tableId': roomId, 'tables': getRooms(companyId)});
 	updateRoomsBroadcast(io, socket, companyId);
