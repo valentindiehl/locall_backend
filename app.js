@@ -81,6 +81,7 @@ const io = require('socket.io')(server, {'pingInterval': 5000});
 
 const roomHandler = require('./handlers/RoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
+const voiceHandler = require('./handlers/VoiceHandler');
 
 // IO Events
 io.use(function (socket, next) {
