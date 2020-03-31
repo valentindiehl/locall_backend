@@ -390,8 +390,9 @@ router.delete('/', auth.required, (req, res) => {
 			console.log(err);
 			res.status(401).json({message: "Not authorized."});
 		}
+		res.clearCookie('token');
 		res.status(200).json({message: "User deleted. Process"});
 	});
-})
+});
 
 module.exports = router;
