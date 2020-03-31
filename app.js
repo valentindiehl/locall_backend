@@ -92,6 +92,7 @@ io.on('connection', function (socket) {
 	console.debug('New client!', socket.id);
 	roomHandler.init(io, socket);
 	signalHandler.init(io, socket);
+	voiceHandler.init(io, socket);
 
 	socket.on('disconnect', function (reason) {
 		console.debug('Client left!', socket.id, "because", reason);
