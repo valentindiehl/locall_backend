@@ -102,6 +102,8 @@ server.on('ready', function () {
 	server.listen(8000, () => console.debug('Server running on http://localhost:8000/'));
 });
 
+console.debug("Test");
+
 const mongoDB = "mongodb://" + process.env.MONGO_DB_USERNAME + ":" + process.env.MONGO_DB_PASSWORD + "@" + process.env.MONGO_DB_URL + "/" + process.env.MONGO_DB_NAME;
 const options = {
 	useNewUrlParser: true,
