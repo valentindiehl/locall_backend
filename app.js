@@ -104,7 +104,8 @@ server.on('ready', function () {
 	server.listen(8000, () => console.debug('Server running on http://localhost:8000/'));
 });
 
-const mongoDB = "mongodb://" + process.env.MONGO_DB_USERNAME + ":" + process.env.MONGO_DB_PASSWORD + "@" + process.env.MONGO_DB_URL + "/" + process.env.MONGO_DB_NAME;
+const mongoDB = "mongodb" + (!!process.env.MONGO_DB_SRV ? process.env.MONGO_DB_SRV : "") + "://" + process.env.MONGO_DB_USERNAME + ":" + process.env.MONGO_DB_PASSWORD + "@" + process.env.MONGO_DB_URL + "/" + process.env.MONGO_DB_NAME;
+console.log("Conntecting to", mongoDB);
 const options = {
 	useNewUrlParser: true,
 	reconnectTries: Number.MAX_VALUE,
