@@ -77,6 +77,9 @@ app.use((err, req, res) => {
 });
 
 // socket.io handling
+// Documentation to our socket.io events here:
+// https://locall.atlassian.net/l/c/o815y8vi
+
 const io = require('socket.io')(server, {'pingInterval': 5000});
 
 const roomHandler = require('./handlers/RoomHandler');
