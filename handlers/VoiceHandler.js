@@ -20,7 +20,7 @@ module.exports = {
 }
 
 function sendMuteSignalToRoom(io, socket, mute) {
-	checkParticipant(io, socket, (roomId, participant) => {
+	checkParticipant(io, socket, (roomId, _, participant) => {
 		participant.muted = mute;
 		io.of('/').to(roomId).emit(mute ? 'participantMute' : 'participantUnmute', {socketId: socket.id});
 	});
@@ -28,7 +28,7 @@ function sendMuteSignalToRoom(io, socket, mute) {
 }
 
 function sendSpeakingSignalToRoom(io, socket, speaking) {
-	checkParticipant(io, socket, (roomId, participant) => {
+	checkParticipant(io, socket, (roomId, _, participant) => {
 		participant.speaking = speaking;
 		io.of('/').to(roomId).emit(speaking ? 'participantSpeaking' : 'participantStoppedSpeaking', {socketId: socket.id});
 	});
