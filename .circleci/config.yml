@@ -12,11 +12,13 @@ jobs:
             - run: npm install
             - run:
                 name: Run tests with JUnit as reporter
-                command: ./node_modules/.bin/jest --ci --runInBand --reporters=default --reporters=jest-junit
+                command: ./node_modules/.bin/jest --ci --runInBand --reporters=default --reporters=jest-junit --collectCoverage
                 environment:
                   JEST_JUNIT_OUTPUT_DIR: "reports/junit/js-test-results.xml"
             - store_test_results:
                 path: reports
+            - store_artifacts:
+                path: coverage
 workflows:
   build-and-test:
     jobs:

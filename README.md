@@ -1,3 +1,6 @@
+[![<LOCALL>](https://circleci.com/gh/valentindiehl/locall_backend/tree/development.svg?style=shield)](https://circleci.com/gh/valentindiehl/locall_backend/tree/development)
+
+
 Auf der interaktiven (Web-)Plattform locall verbinden wir Solidarität mit der Aufrechterhaltung des (persönlichen) sozialen Netzwerkes.
 
 ## Problematik
