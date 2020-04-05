@@ -1,11 +1,11 @@
 const jwt = require('express-jwt');
 
+/* istanbul ignore next */
 const getTokenFromCookie = (req) => {
-    console.debug(req.cookies);
-    console.debug(req.signedCookies);
     return req.cookies.token;
 };
 
+/* istanbul ignore next */
 const getTokenFromHeaders = (req) => {
     const { headers: { authorization } } = req;
 
@@ -15,6 +15,7 @@ const getTokenFromHeaders = (req) => {
     return null;
 };
 
+/* istanbul ignore next */
 const auth = {
     required: jwt({
         secret: 'secret',
