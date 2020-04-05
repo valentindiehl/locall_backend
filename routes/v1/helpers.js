@@ -57,14 +57,26 @@ module.exports = {
         {
             response["business"] = { test: "test"}
         }
+        if (fields.length !== 0)
+        {
+            response.account = {
+                ...( fields.includes("email")) && { email: user.email },
+                ...( fields.includes("name")) && { name: user.name },
+                ...( fields.includes("_id")) && { _id: user._id},
+                ...( fields.includes("picture_url")) && { picture_url: user.picture_url },
+                ...( fields.includes("isBusiness")) && { isBusiness: user.isBusiness }
+            };
+        } else {
+            response.account = {
+                email: user.email,
+                name: user.name,
+                _id: user._id,
+                picture_url: user.picture_url,
+                isBusiness: user.isBusiness,
+                businessId: user.businessId
+            };
+        }
 
-        response.account = {
-            ...( fields.includes("email")) && { email: user.email },
-            ...( fields.includes("name")) && { name: user.name },
-            ...( fields.includes("_id")) && { _id: user._id},
-            ...( fields.includes("picture_url")) && { picture_url: user.picture_url },
-            ...( fields.includes("isBusiness")) && { isBusiness: user.isBusiness }
-        };
         return response;
     },
     AuthObject: function(user) {

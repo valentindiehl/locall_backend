@@ -22,6 +22,7 @@ router.post('/', auth.optional, (req, res) => {
     }
 
     Users.findOne({email: account.email}, (err, matchingUser) => {
+        /* istanbul ignore next */
         if (err) {
             /* istanbul ignore next */
             return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
@@ -46,7 +47,10 @@ router.post('/', auth.optional, (req, res) => {
                 };
                 helpers.sendEmail(account.email, account.name, 1, params)
                     .then((data) => res.status(202).json(helpers.AccountObject(finalUser, ["_id", "email", "name"])))
-                    .catch((err) => res.status(500).json(helpers.ErrorObject(101, "Internal error.")));
+                    .catch((err) => {
+                        /* istanbul ignore next */
+                        res.status(500).json(helpers.ErrorObject(101, "Internal error."))
+                    });
             });
     });
 });
@@ -60,6 +64,7 @@ router.post('/email-validation', auth.optional, (req, res) => {
     const {body: {account}} = req;
 
     Users.findOne({optInToken: account.token}, function (err, user) {
+        /* istanbul ignore next */
         if (err) {
             /* istanbul ignore next */
             return console.error(err);
@@ -85,15 +90,17 @@ router.post('/login', auth.optional, (req, res) => {
         return res.status(422).json(helpers.ErrorObject(422, "Missing fields!"));
     }
     return passport.authenticate('local', {session: false}, (err, passportUser) => {
+        /* istanbul ignore next */
         if (err) {
             /* istanbul ignore next */
             return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
         }
+        console.log(account);
         if (passportUser) {
             const user = passportUser;
 
             if (!user.isOptedIn) {
-                return res.status(200).json(helpers.ErrorObject(400, "Login failed"));
+                return res.status(200).json(helpers.ErrorObject(101, "Authentication failed"));
             }
             user.token = passportUser.generateJWT();
             helpers.addCookie(user, req, res);
@@ -104,35 +111,103 @@ router.post('/login', auth.optional, (req, res) => {
 });
 
 /**
- * Authenticated Password Change Flow
+ * Password Change / Reset Flow
  */
-router.patch('/password', auth.required, (req, res) => {
+router.patch('/password', auth.optional, (req, res) => {
+    const {body: {account}} = req;
+    if (account.email)
+    {
+        Users.findOne({email: account.email}, function (err, user) {
+            /* istanbul ignore next */
+            if (err) {
+                /* istanbul ignore next */
+                return res.status(500).json({message: "Internal error. Please try again later."});
+            }
+            if (user) {
+                const token = user.generatePasswordResetToken();
+                user.save()
+                    .then(() => {
+                        const params = {
+                            link: process.env.FRONT_URL + "/reset-password/" + token
+                        };
+                        helpers.sendEmail(user.email, user.name, 2, params)
+                            .catch((err) => {
+                                /* istanbul ignore next */
+                                res.status(500).json(helpers.ErrorObject(500, "Internal error."))
+                            });
+                    });
+            }
+            return res.status(200).json({message: "If email is registered, you will receive instructions soon via mail."});
+        })
+    } else if (account.resetToken)
+    {
+        Users.findOne({resetPasswordToken: account.resetToken}, function (err, matchingUser) {
+            /* istanbul ignore next */
+            if (err) return res.status(500).json(helpers.ErrorObject(500, "Internal error"));
+            if (!matchingUser) return res.status(404).json(helpers.ErrorObject(404, "No matching user found. Is your token correct?"));
+            /* istanbul ignore next */
+            if (matchingUser.resetPasswordExpires <= Date.now()) return res.status(420).json(helpers.ErrorObject(422, "Link expired. Please start password reset flow again."));
+
+            matchingUser.setPassword(account.password);
+            matchingUser.resetPasswordExpires = Date.now();
+            matchingUser.resetPasswordToken = "";
+            matchingUser.save()
+                .then(() => res.status(200).json({message: "Password updated successfuly!"}));
+        });
+    } else if (account.oldPassword)
+    {
+        if (!req.cookies.token)
+        {
+            return res.status(401).json(helpers.ErrorObject(401, "No authorization token found."))
+        }
+        const {payload: {id}} = req;
+        if (!account.password || !account.oldPassword) {
+            return res.status(422).json({message: "Password is missing!"})
+        }
+
+        Users.findById(id)
+            .then(function (matchingUser) {
+                /* istanbul ignore next */
+                if (!matchingUser) {
+                    return res.status(400).json(helpers.ErrorObject(400, "Bad request."))
+                }
+                if (matchingUser.validatePassword(account.oldPassword)) {
+                    matchingUser.setPassword(account.password);
+                    matchingUser.save()
+                        .then(() => {
+                            return res.status(200).json({account: matchingUser.toAuthJSON()})
+                        })
+                } else return res.status(401).json(helpers.ErrorObject(401, "Authentication failed."));
+            })/* istanbul ignore next */
+            .catch(() => {
+            /* istanbul ignore next */
+            res.status(500).json(helpers.ErrorObject(500, "Internal error."))
+        })
+    } else res.status(400).json(helpers.ErrorObject(400, "Bad request"));
+});
+
+router.patch('/name', auth.required, (req, res) => {
     const {payload: {id}} = req;
     const {body: {account}} = req;
 
-    if (!account.password || !account.oldPassword) {
-        return res.status(422).json({message: "Password is missing!"})
-    }
-
     Users.findById(id)
-        .then(function (matchingUser) {
+        .then(function(matchingUser) {
+            /* istanbul ignore next */
             if (!matchingUser) {
+                /* istanbul ignore next */
                 return res.status(400).json(helpers.ErrorObject(400, "Bad request."))
             }
-            if (matchingUser.validatePassword(account.oldPassword)) {
-                matchingUser.setPassword(account.password);
-                matchingUser.save()
-                    .then(() => res.status(200).json({account: matchingUser.toAuthJSON()}))
-            } else return res.status(401).json(helpers.ErrorObject(401, "Authentication failed."));
-        })
+
+            matchingUser.name = account.name;
+            matchingUser.save()
+                .then(() => {
+                    return res.status(200).json( helpers.AccountObject(matchingUser, []))
+                })
+        }) /* istanbul ignore next */
+        .catch(() => {
+            /* istanbul ignore next */
+            res.status(500).json(helpers.ErrorObject(500, "Internal error."))
+        });
 });
-
-/**
- * Unauthenticated Password Change
- * Step 1: Send Recovery Email
- */
-router.patch('/password', auth.optional, (req, res) => {
-
-})
 
 module.exports = router;
