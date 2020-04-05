@@ -98,7 +98,18 @@ describe('Registration & Login Flow', () => {
 
 describe('Login Flow', () => {
 
-    beforeAll(() => {
+    beforeAll((done) => {
+        const user = {
+            email: "testuser@nonexisting.de",
+            name: "Name to test"
+        }
+        const finalUser = new Users(user);
+        finalUser.setPassword("test12345");
+        finalUser.isOptedIn = true;
+        return finalUser.save()
+            .then((user) => {
+                done();
+            });
     });
 
     it('should allow login for an existing account', async () => {
@@ -140,6 +151,7 @@ describe('Login Flow', () => {
     });
 });
 describe('Password Reset Flow', () => {
+
     it('should allow a user to update his password', async () => {
         let res = await request(app)
             .post('/v1/account/login')
@@ -305,12 +317,6 @@ describe('Password Reset Flow', () => {
 });
 
 describe("Account Modification Flow", () => {
-    afterAll(() => {
-        mongoose.disconnect();
-    });
-
-    beforeAll(() => {
-    });
 
     it('should allow an authenticated user to update his name', async() => {
         let res = await request(app)
@@ -345,6 +351,34 @@ describe("Account Modification Flow", () => {
                 }
             });
         expect(res.statusCode).toEqual(401);
+    });
+
+});
+
+describe('User Deletion Flow', () => {
+
+    afterAll(() => {
+        mongoose.disconnect();
+    })
+
+    it('should delete an authenticated user', async() => {
+        let res = await request(app)
+            .post('/v1/account/login')
+            .send({
+                account: {
+                    email: "testuser@nonexisting.de",
+                    password: "test12345"
+                }
+            });
+        console.log(res.headers['set-cookies']);
+        let cookie = res.headers['set-cookie'];
+        console.log(cookie);
+
+        res = await request(app)
+            .delete('/v1/account')
+            .set('cookie', cookie)
+            .send();
+        expect(res.statusCode).toEqual(200);
     });
 
     it('should clean up database connection', () => {

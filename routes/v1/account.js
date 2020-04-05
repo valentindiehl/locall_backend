@@ -186,6 +186,9 @@ router.patch('/password', auth.optional, (req, res) => {
     } else res.status(400).json(helpers.ErrorObject(400, "Bad request"));
 });
 
+/**
+ * Change Name Request
+ */
 router.patch('/name', auth.required, (req, res) => {
     const {payload: {id}} = req;
     const {body: {account}} = req;
@@ -208,6 +211,22 @@ router.patch('/name', auth.required, (req, res) => {
             /* istanbul ignore next */
             res.status(500).json(helpers.ErrorObject(500, "Internal error."))
         });
+});
+
+/**
+ * Delete User Request
+ */
+router.delete('/', auth.required, (req, res) => {
+    Users.deleteOne({_id: req.payload.id}, function(err) {
+        /* istanbul ignore next */
+        if (err)
+        {
+            /* istanbul ignore next */
+            res.status(401).json({message: "Not authorized."});
+        }
+        res.clearCookie('token');
+        res.status(200).json({message: "User deleted. Process"});
+    });
 });
 
 module.exports = router;
