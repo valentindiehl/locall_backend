@@ -1,5 +1,4 @@
 const uuid = require('uuid');
-const Users = require('mongoose').model("Users");
 
 // TODO: Use namespaces for different cafes
 //  and change registeredRooms to object mapping from cafe to array of rooms
@@ -44,6 +43,8 @@ module.exports = {
 				const roomId = data.tableId;
 				const sockets = io.of("/").in().adapter.rooms[roomId];
 				if (!assignedIds.includes(roomId) && (typeof sockets === 'undefined' || sockets.length < 1)) {
+					let roomsInCompany = registeredRooms[companyId];
+					if (!!roomsInCompany && !!roomsInCompany[roomId]) delete registeredRooms[companyId][roomId]; // Cleanup not existing tables
 					socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
 					return;
 				}
@@ -101,11 +102,12 @@ function joinRoom(io, socket, roomId, companyId, userId) {
 	if (!registeredRooms[companyId][roomId]) {
 		const room = io.of("/").in().adapter.rooms[roomId];
 		room.prefixName = getRoomName(Object.values(registeredRooms[companyId]));
-		room.participants = {}
-		room.participants[socket.id] = userId;
+		room.participants = {};
+		room.companyId = companyId;
 		registeredRooms[companyId][roomId] = room;
+		room.participants[socket.id] = {userId: userId};
 	} else {
-		registeredRooms[companyId][roomId].participants[socket.id] = userId;
+		registeredRooms[companyId][roomId].participants[socket.id] = {userId: userId};
 	}
 	socket.emit('joinedTable', {'tableId': roomId, 'tables': getRooms(companyId), 'myId': userId});
 	updateRoomsBroadcast(io, socket, companyId);
@@ -126,7 +128,7 @@ function leaveRoom(socket, io, companyId) {
 		delete registeredRooms[companyId][roomId][socketId];
 		let room = io.of("/").in().adapter.rooms[roomId];
 		// Check if room is empty
-		if (typeof room === "undefined" && typeof registeredRooms[companyId][roomId] !== 'undefined') {
+		if ((!room || room.length === 0) && !!registeredRooms[companyId][roomId]) {
 			// If so, remove it from memory
 			delete registeredRooms[companyId][roomId];
 		}
