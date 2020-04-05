@@ -13,7 +13,6 @@ router.use(passport.session());
 module.exports = {
     addCookie: function(user, req, res) {
         res.cookie('token', user.token, {httpOnly: true});
-        res.cookie('test', 'BLUBS');
         req.session.userId = user._id.toString();
     },
     ErrorObject: function(code, message) {
