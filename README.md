@@ -1,5 +1,5 @@
 [![<LOCALL>](https://circleci.com/gh/valentindiehl/locall_backend/tree/development.svg?style=shield)](https://circleci.com/gh/valentindiehl/locall_backend/tree/development)
-
+[![codecov](https://codecov.io/gh/valentindiehl/locall_backend/branch/development/graph/badge.svg)](https://codecov.io/gh/valentindiehl/locall_backend)
 
 Auf der interaktiven (Web-)Plattform locall verbinden wir Solidarität mit der Aufrechterhaltung des (persönlichen) sozialen Netzwerkes.
 
