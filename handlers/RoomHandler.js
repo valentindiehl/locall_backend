@@ -102,7 +102,8 @@ function joinRoom(io, socket, roomId, companyId, userId) {
 	if (!registeredRooms[companyId][roomId]) {
 		const room = io.of("/").in().adapter.rooms[roomId];
 		room.prefixName = getRoomName(Object.values(registeredRooms[companyId]));
-		room.participants = {}
+		room.participants = {};
+		room.companyId = companyId;
 		registeredRooms[companyId][roomId] = room;
 		room.participants[socket.id] = {userId: userId};
 	} else {
