@@ -103,7 +103,9 @@ router.post('/login', auth.optional, (req, res) => {
                 return res.status(200).json(helpers.ErrorObject(101, "Authentication failed"));
             }
             user.token = passportUser.generateJWT();
-            helpers.addCookie(user, req, res);
+            res.cookie('token', user.token, {httpOnly: true});
+            req.session.userId = user._id.toString();
+            console.log(res.cookies);
             return res.json({account: user.toAuthJSON()});
         }
         return res.status(200).json(helpers.ErrorObject(101, "Authentication failed"));
@@ -227,6 +229,15 @@ router.delete('/', auth.required, (req, res) => {
         res.clearCookie('token');
         res.status(200).json({message: "User deleted. Process"});
     });
+});
+
+/**
+ * Log Out Request
+ */
+router.delete('/token', auth.required, (req, res) => {
+    res.clearCookie('token');
+    req.session.userId = null;
+    return res.status(204).json();
 });
 
 module.exports = router;
