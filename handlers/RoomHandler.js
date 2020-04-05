@@ -1,13 +1,16 @@
-const uuid = require('uuid');
+/**
+ * Documentation to the events declared here, can be found here:
+ * https://locall.atlassian.net/l/c/hSXHfUGm
+ */
 
-// TODO: Use namespaces for different cafes
-//  and change registeredRooms to object mapping from cafe to array of rooms
+const uuid = require('uuid');
 const registeredRooms = {};
 const assignedIds = [];
+
 module.exports = {
 	init: function (io, socket) {
 		socket.on('requestTables', function (data) {
-			checkLogin(socket, (userId) => {
+			checkLogin(socket, (_) => {
 				const companyId = checkCompanyId(socket, data);
 				if (!companyId) return;
 				updateRoomsUnicast(socket, companyId);
@@ -15,7 +18,7 @@ module.exports = {
 		});
 
 		socket.on('addTable', function (data) {
-			checkLogin(socket, (userId) => {
+			checkLogin(socket, (_) => {
 				const companyId = checkCompanyId(socket, data);
 				if (!companyId) return;
 
@@ -45,6 +48,14 @@ module.exports = {
 				if (!assignedIds.includes(roomId) && (typeof sockets === 'undefined' || sockets.length < 1)) {
 					let roomsInCompany = registeredRooms[companyId];
 					if (!!roomsInCompany && !!roomsInCompany[roomId]) delete registeredRooms[companyId][roomId]; // Cleanup not existing tables
+					socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
+					return;
+				}
+				if (!assignedIds.includes(roomId) && !registeredRooms[companyId]) {
+					socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
+					return;
+				}
+				if (!assignedIds.includes(roomId) && !!registeredRooms[companyId] && !registeredRooms[companyId][roomId]) {
 					socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
 					return;
 				}

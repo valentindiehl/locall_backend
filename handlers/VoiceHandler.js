@@ -1,8 +1,12 @@
+/**
+ * Documentation to the events declared here, can be found here:
+ * https://locall.atlassian.net/l/c/NUzmrM12
+ */
+
 module.exports = {
 	init: function (io, socket) {
 		socket.on('mute', function () {
 			sendMuteSignalToRoom(io, socket, true);
-
 		});
 
 		socket.on('unmute', function () {
