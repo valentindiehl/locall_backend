@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('../auth');
 const Users = mongoose.model('Users');
+const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 const Error = require('./helpers');
 

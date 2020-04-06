@@ -240,4 +240,57 @@ router.delete('/token', auth.required, (req, res) => {
     return res.status(204).json();
 });
 
+/**
+ * Get Own Business Data
+ */
+router.get('/business', auth.required, (req, res, next) => {
+    const {payload: {id}} = req;
+
+    Users.findById(id)
+        .then((user) => {
+            if (!user) return res.status(400).json({message: 'Bad request.'});
+            if (!user.isBusiness) return res.status(401).json({message: 'Not authorized for business API.'});
+
+            Businesses.findOne({id: user.businessId}, function(err, business) {
+                if (err) return res.status(500).message("Internal error. Please try again later.");
+                if (!business)
+                {
+                    return res.status(500).message("Could not find your business. Please consult technical support");
+                }
+                return res.status(200).json(business);
+            });
+        });
+    return res.status(400).message("Bad request.");
+});
+
+/**
+ * Change Business Data
+ */
+router.patch('/business', auth.required, (req, res, next) => {
+    const {payload: {id}} = req;
+    const {body: {business}} = req;
+
+    Users.findById(id)
+        .then((user) => {
+            if (!user) return res.status(400).json({message: 'Bad request.'});
+            if (!user.isBusiness) return res.status(401).json({message: 'Not authorized for business API.'});
+
+            Businesses.findOne({id: user.businessId}, function(err, matchingBusiness) {
+                if (err) return res.status(500).json({message: "Internal error. Please try again later."});
+                if (!matchingBusiness)
+                {
+                    return res.status(500).json({message: "Could not find your business. Please consult technical support"});
+                }
+                console.debug("temp: " + business);
+                console.debug("db: " + matchingBusiness);
+                if (business.paypal != null) matchingBusiness.paypal = business.paypal;
+                if (business.description) matchingBusiness.message = business.description;
+
+                matchingBusiness.save()
+                    .then(() => res.status(200).json(matchingBusiness));
+            });
+        })
+});
+
+
 module.exports = router;
