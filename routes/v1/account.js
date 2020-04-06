@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('../auth');
 const Users = mongoose.model('Users');
+const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 const helpers = require('./helpers');
 
@@ -75,6 +76,7 @@ router.post('/email-validation', auth.optional, (req, res) => {
         /* istanbul ignore next */
         user.isOptedIn = true;
         user.save(function (err) {
+            /* istanbul ignore next */
             if (err) return console.error(err);
             return res.send(user);
         });
@@ -124,6 +126,7 @@ router.patch('/password', auth.optional, (req, res) => {
             if (err) {
                 /* istanbul ignore next */
                 return res.status(500).json({message: "Internal error. Please try again later."});
+                /* istanbul ignore next */
             }
             if (user) {
                 const token = user.generatePasswordResetToken();
@@ -232,15 +235,6 @@ router.delete('/', auth.required, (req, res) => {
 });
 
 /**
- * Log Out Request
- */
-router.delete('/token', auth.required, (req, res) => {
-    res.clearCookie('token');
-    req.session.userId = null;
-    return res.status(204).json();
-});
-
-/**
  * Get Own Business Data
  */
 router.get('/business', auth.required, (req, res, next) => {
@@ -248,19 +242,29 @@ router.get('/business', auth.required, (req, res, next) => {
 
     Users.findById(id)
         .then((user) => {
-            if (!user) return res.status(400).json({message: 'Bad request.'});
-            if (!user.isBusiness) return res.status(401).json({message: 'Not authorized for business API.'});
+            if (!user) return res.status(400).json(helpers.ErrorObject(400, "Bad request."));
+            if (!user.isBusiness) return res.status(401).json(helpers.ErrorObject(401, "Not authorized to use business API."));
 
-            Businesses.findOne({id: user.businessId}, function(err, business) {
-                if (err) return res.status(500).message("Internal error. Please try again later.");
+            Businesses.findOne({_id: user.businessId}, function(err, business) {
+                /* istanbul ignore next */
+                if (err)
+                {
+                    /* istanbul ignore next */
+                    return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
+                }
                 if (!business)
                 {
-                    return res.status(500).message("Could not find your business. Please consult technical support");
+                    /* istanbul ignore next */
+                    return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
                 }
                 return res.status(200).json(business);
             });
-        });
-    return res.status(400).message("Bad request.");
+        })
+        /* istanbul ignore next */
+        .catch(() => {
+            /* istanbul ignore next */
+            return res.status(400).json(helpers.ErrorObject(500, "Internal error."));
+        })
 });
 
 /**
@@ -275,10 +279,16 @@ router.patch('/business', auth.required, (req, res, next) => {
             if (!user) return res.status(400).json({message: 'Bad request.'});
             if (!user.isBusiness) return res.status(401).json({message: 'Not authorized for business API.'});
 
-            Businesses.findOne({id: user.businessId}, function(err, matchingBusiness) {
-                if (err) return res.status(500).json({message: "Internal error. Please try again later."});
+            Businesses.findOne({_id: user.businessId}, function(err, matchingBusiness) {
+                /* istanbul ignore next */
+                if (err) {
+                    /* istanbul ignore next */
+                    return res.status(500).json({message: "Internal error. Please try again later."});
+                }
+                /* istanbul ignore next */
                 if (!matchingBusiness)
                 {
+                    /* istanbul ignore next */
                     return res.status(500).json({message: "Could not find your business. Please consult technical support"});
                 }
                 console.debug("temp: " + business);

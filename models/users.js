@@ -13,7 +13,7 @@ const UsersSchema = new Schema({
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     isBusiness: Boolean,
-    businessId: Number,
+    businessId: String,
     hash: String,
     salt: String,
 });

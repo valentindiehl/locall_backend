@@ -7,18 +7,14 @@ const Businesses = mongoose.model('Businesses');
 
 describe('Account List Generation', () => {
 
-    afterAll((done) => {
-        Businesses.deleteOne({
-            _id: "9e86f61d1c9d440000118e29"
-        })
-            .then(() => {
-                mongoose.disconnect();
-                done();
-            });
+    afterAll(async () => {
+        await Users.deleteOne({email: "businssestest@nonexisting.de"});
+        await Businesses.deleteOne({_id: "9e86f61d1c9d440000118e29"})
+        await mongoose.disconnect();
     });
 
-    beforeAll((done) => {
-        const testBusiness = new Businesses({
+    beforeAll(async () => {
+        const testBusiness = await new Businesses({
             coordinates: { lat: '11.575538', lon: '48.137292' },
             _id: "9e86f61d1c9d440000118e29",
             id: 999,
@@ -31,11 +27,15 @@ describe('Account List Generation', () => {
             tables: null
         });
 
-        testBusiness
-            .save()
-            .then(() => {
-                done();
-            });
+        const authUser = await new Users({
+            email: "businssestest@nonexisting.de",
+            name: "Test Auth User",
+            isOptedIn: true
+        });
+
+        await authUser.setPassword("test12345");
+        await authUser.save();
+        await testBusiness.save();
     });
 
     it('should not return the businesses if not authenticated', async () => {
@@ -50,7 +50,7 @@ describe('Account List Generation', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "businssestest@nonexisting.de",
                     password: "test12345"
                 }
             });
@@ -78,7 +78,7 @@ describe('Account List Generation', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "businssestest@nonexisting.de",
                     password: "test12345"
                 }
             });
@@ -99,7 +99,7 @@ describe('Account List Generation', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "businssestest@nonexisting.de",
                     password: "test12345"
                 }
             });

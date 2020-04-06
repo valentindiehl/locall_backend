@@ -7,11 +7,8 @@ const Users = mongoose.model('Users');
 
 describe('Registration & Login Flow', () => {
 
-    beforeAll(() => {
-        Users.deleteOne({email: "testaccount@locall-map.de"})
-            .then(() => {
-                console.log("Cleared database");
-            });
+    beforeAll(async () => {
+        await Users.deleteOne({email: "testaccount@locall-map.de"})
     });
 
     it('should create a new user', async () => {
@@ -98,9 +95,9 @@ describe('Registration & Login Flow', () => {
 
 describe('Login Flow', () => {
 
-    beforeAll((done) => {
+     beforeAll((done) => {
         const user = {
-            email: "testaccount@locall-map.de",
+            email: "testaccount2@locall-map.de",
             name: "Name to test"
         }
         const finalUser = new Users(user);
@@ -117,7 +114,7 @@ describe('Login Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -129,7 +126,7 @@ describe('Login Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test123456"
                 }
             });
@@ -157,7 +154,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -182,7 +179,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -205,7 +202,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -228,7 +225,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@locall-map.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -316,6 +313,8 @@ describe('Password Reset Flow', () => {
     });
 });
 
+
+
 describe("Account Modification Flow", () => {
 
     it('should allow an authenticated user to update his name', async() => {
@@ -359,7 +358,7 @@ describe('User Deletion Flow', () => {
 
     afterAll(() => {
         mongoose.disconnect();
-    })
+    });
 
     it('should delete an authenticated user', async() => {
         let res = await request(app)
