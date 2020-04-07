@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('../auth');
 const Users = mongoose.model('Users');
+const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 const Error = require('./helpers');
 
@@ -13,7 +14,6 @@ router.use(passport.session());
 module.exports = {
     addCookie: function(user, req, res) {
         res.cookie('token', user.token, {httpOnly: true});
-        res.cookie('test', 'BLUBS');
         req.session.userId = user._id.toString();
     },
     ErrorObject: function(code, message) {

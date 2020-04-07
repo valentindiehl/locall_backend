@@ -3,6 +3,7 @@ const passport = require('passport');
 const router = require('express').Router();
 const auth = require('../auth');
 const Users = mongoose.model('Users');
+const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 const helpers = require('./helpers');
 
@@ -75,6 +76,7 @@ router.post('/email-validation', auth.optional, (req, res) => {
         /* istanbul ignore next */
         user.isOptedIn = true;
         user.save(function (err) {
+            /* istanbul ignore next */
             if (err) return console.error(err);
             return res.send(user);
         });
@@ -103,7 +105,9 @@ router.post('/login', auth.optional, (req, res) => {
                 return res.status(200).json(helpers.ErrorObject(101, "Authentication failed"));
             }
             user.token = passportUser.generateJWT();
-            helpers.addCookie(user, req, res);
+            res.cookie('token', user.token, {httpOnly: true});
+            req.session.userId = user._id.toString();
+            console.log(res.cookies);
             return res.json({account: user.toAuthJSON()});
         }
         return res.status(200).json(helpers.ErrorObject(101, "Authentication failed"));
@@ -122,6 +126,7 @@ router.patch('/password', auth.optional, (req, res) => {
             if (err) {
                 /* istanbul ignore next */
                 return res.status(500).json({message: "Internal error. Please try again later."});
+                /* istanbul ignore next */
             }
             if (user) {
                 const token = user.generatePasswordResetToken();
@@ -214,6 +219,18 @@ router.patch('/name', auth.required, (req, res) => {
 });
 
 /**
+ * Get own account data
+ */
+router.get('/', auth.required, (req, res) => {
+   const {payload: {id}} = req;
+
+   Users.findById(id)
+       .then((account) => {
+           return res.status(200).json(account);
+       })
+});
+
+/**
  * Delete User Request
  */
 router.delete('/', auth.required, (req, res) => {
@@ -228,5 +245,74 @@ router.delete('/', auth.required, (req, res) => {
         res.status(200).json({message: "User deleted. Process"});
     });
 });
+
+/**
+ * Get Own Business Data
+ */
+router.get('/business', auth.required, (req, res, next) => {
+    const {payload: {id}} = req;
+
+    Users.findById(id)
+        .then((user) => {
+            if (!user) return res.status(400).json(helpers.ErrorObject(400, "Bad request."));
+            if (!user.isBusiness) return res.status(401).json(helpers.ErrorObject(401, "Not authorized to use business API."));
+
+            Businesses.findOne({_id: user.businessId}, function(err, business) {
+                /* istanbul ignore next */
+                if (err)
+                {
+                    /* istanbul ignore next */
+                    return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
+                }
+                if (!business)
+                {
+                    /* istanbul ignore next */
+                    return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
+                }
+                return res.status(200).json(business);
+            });
+        })
+        /* istanbul ignore next */
+        .catch(() => {
+            /* istanbul ignore next */
+            return res.status(400).json(helpers.ErrorObject(500, "Internal error."));
+        })
+});
+
+/**
+ * Change Business Data
+ */
+router.patch('/business', auth.required, (req, res, next) => {
+    const {payload: {id}} = req;
+    const {body: {business}} = req;
+
+    Users.findById(id)
+        .then((user) => {
+            if (!user) return res.status(400).json({message: 'Bad request.'});
+            if (!user.isBusiness) return res.status(401).json({message: 'Not authorized for business API.'});
+
+            Businesses.findOne({_id: user.businessId}, function(err, matchingBusiness) {
+                /* istanbul ignore next */
+                if (err) {
+                    /* istanbul ignore next */
+                    return res.status(500).json({message: "Internal error. Please try again later."});
+                }
+                /* istanbul ignore next */
+                if (!matchingBusiness)
+                {
+                    /* istanbul ignore next */
+                    return res.status(500).json({message: "Could not find your business. Please consult technical support"});
+                }
+                console.debug("temp: " + business);
+                console.debug("db: " + matchingBusiness);
+                if (business.paypal != null) matchingBusiness.paypal = business.paypal;
+                if (business.description) matchingBusiness.message = business.description;
+
+                matchingBusiness.save()
+                    .then(() => res.status(200).json(matchingBusiness));
+            });
+        })
+});
+
 
 module.exports = router;

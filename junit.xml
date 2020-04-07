@@ -1,47 +1,83 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="21" failures="0" time="10.225">
-  <testsuite name="Registration &amp; Login Flow" errors="0" failures="0" skipped="0" timestamp="2020-04-05T14:37:46" time="9.942" tests="21">
-    <testcase classname="Registration &amp; Login Flow should create a new user" name="Registration &amp; Login Flow should create a new user" time="0.899">
+<testsuites name="jest tests" tests="35" failures="0" time="18.014">
+  <testsuite name="Account Business Info" errors="0" failures="0" skipped="0" timestamp="2020-04-06T22:30:25" time="10.557" tests="2">
+    <testcase classname="Account Business Info should let an authenticated business user account access its business information" name="Account Business Info should let an authenticated business user account access its business information" time="0.946">
+    </testcase>
+    <testcase classname="Account Business Info shoud allow an authenticated user to make changes on their data" name="Account Business Info shoud allow an authenticated user to make changes on their data" time="1.056">
+    </testcase>
+  </testsuite>
+  <testsuite name="Account List Generation" errors="0" failures="0" skipped="0" timestamp="2020-04-06T22:30:25" time="10.739" tests="5">
+    <testcase classname="Account List Generation should not return the businesses if not authenticated" name="Account List Generation should not return the businesses if not authenticated" time="0.086">
+    </testcase>
+    <testcase classname="Account List Generation should return a list of businesses from the database if authenticated" name="Account List Generation should return a list of businesses from the database if authenticated" time="0.821">
+    </testcase>
+    <testcase classname="Account List Generation should not return a particular business if not authenticated" name="Account List Generation should not return a particular business if not authenticated" time="0.174">
+    </testcase>
+    <testcase classname="Account List Generation should return a particular businesses from the database if authenticated" name="Account List Generation should return a particular businesses from the database if authenticated" time="0.658">
+    </testcase>
+    <testcase classname="Account List Generation should not return a non-existing business" name="Account List Generation should not return a non-existing business" time="0.371">
+    </testcase>
+  </testsuite>
+  <testsuite name="Auth Check &amp; Logout" errors="0" failures="0" skipped="0" timestamp="2020-04-06T22:30:36" time="4.146" tests="4">
+    <testcase classname="Auth Check &amp; Logout should not allow check when checking an un-authenticated user" name="Auth Check &amp; Logout should not allow check when checking an un-authenticated user" time="0.092">
+    </testcase>
+    <testcase classname="Auth Check &amp; Logout should allow check when checking an authenticated user" name="Auth Check &amp; Logout should allow check when checking an authenticated user" time="0.813">
+    </testcase>
+    <testcase classname="Auth Check &amp; Logout should not allow logout on an un-authenticated user" name="Auth Check &amp; Logout should not allow logout on an un-authenticated user" time="0.097">
+    </testcase>
+    <testcase classname="Auth Check &amp; Logout should allow logout on an authenticated user" name="Auth Check &amp; Logout should allow logout on an authenticated user" time="0.699">
+    </testcase>
+  </testsuite>
+  <testsuite name="Public Users API Endpoint" errors="0" failures="0" skipped="0" timestamp="2020-04-06T22:30:36" time="4.331" tests="3">
+    <testcase classname="Public Users API Endpoint should not give an unauthenticated user public information" name="Public Users API Endpoint should not give an unauthenticated user public information" time="0.101">
+    </testcase>
+    <testcase classname="Public Users API Endpoint should give an authenticated user public information" name="Public Users API Endpoint should give an authenticated user public information" time="0.704">
+    </testcase>
+    <testcase classname="Public Users API Endpoint should throw an error on non-existing information" name="Public Users API Endpoint should throw an error on non-existing information" time="1.34">
+    </testcase>
+  </testsuite>
+  <testsuite name="Registration &amp; Login Flow" errors="0" failures="0" skipped="0" timestamp="2020-04-06T22:30:25" time="17.168" tests="21">
+    <testcase classname="Registration &amp; Login Flow should create a new user" name="Registration &amp; Login Flow should create a new user" time="1.317">
     </testcase>
     <testcase classname="Registration &amp; Login Flow should return an error if fields are missing" name="Registration &amp; Login Flow should return an error if fields are missing" time="0.045">
     </testcase>
-    <testcase classname="Registration &amp; Login Flow should return no error for a duplicate registration" name="Registration &amp; Login Flow should return no error for a duplicate registration" time="0.438">
+    <testcase classname="Registration &amp; Login Flow should return no error for a duplicate registration" name="Registration &amp; Login Flow should return no error for a duplicate registration" time="0.089">
     </testcase>
-    <testcase classname="Registration &amp; Login Flow should return an error for a login without validation" name="Registration &amp; Login Flow should return an error for a login without validation" time="0.153">
+    <testcase classname="Registration &amp; Login Flow should return an error for a login without validation" name="Registration &amp; Login Flow should return an error for a login without validation" time="0.311">
     </testcase>
-    <testcase classname="Registration &amp; Login Flow should return an error for a login with missing fields" name="Registration &amp; Login Flow should return an error for a login with missing fields" time="0.038">
+    <testcase classname="Registration &amp; Login Flow should return an error for a login with missing fields" name="Registration &amp; Login Flow should return an error for a login with missing fields" time="0.195">
     </testcase>
-    <testcase classname="Registration &amp; Login Flow should validate an existing account" name="Registration &amp; Login Flow should validate an existing account" time="0.045">
+    <testcase classname="Registration &amp; Login Flow should validate an existing account" name="Registration &amp; Login Flow should validate an existing account" time="0.179">
     </testcase>
-    <testcase classname="Login Flow should allow login for an existing account" name="Login Flow should allow login for an existing account" time="0.143">
+    <testcase classname="Login Flow should allow login for an existing account" name="Login Flow should allow login for an existing account" time="0.404">
     </testcase>
-    <testcase classname="Login Flow should not allow login for an account with wrong password" name="Login Flow should not allow login for an account with wrong password" time="0.151">
+    <testcase classname="Login Flow should not allow login for an account with wrong password" name="Login Flow should not allow login for an account with wrong password" time="0.34">
     </testcase>
-    <testcase classname="Login Flow should throw no error for a non-existing account" name="Login Flow should throw no error for a non-existing account" time="0.082">
+    <testcase classname="Login Flow should throw no error for a non-existing account" name="Login Flow should throw no error for a non-existing account" time="0.088">
     </testcase>
-    <testcase classname="Password Reset Flow should allow a user to update his password" name="Password Reset Flow should allow a user to update his password" time="0.375">
+    <testcase classname="Password Reset Flow should allow a user to update his password" name="Password Reset Flow should allow a user to update his password" time="0.574">
     </testcase>
-    <testcase classname="Password Reset Flow should not allow a user to update his password when type fields are missing" name="Password Reset Flow should not allow a user to update his password when type fields are missing" time="0.182">
+    <testcase classname="Password Reset Flow should not allow a user to update his password when type fields are missing" name="Password Reset Flow should not allow a user to update his password when type fields are missing" time="0.337">
     </testcase>
-    <testcase classname="Password Reset Flow should not allow a user to update his password when other fields are missing" name="Password Reset Flow should not allow a user to update his password when other fields are missing" time="0.191">
+    <testcase classname="Password Reset Flow should not allow a user to update his password when other fields are missing" name="Password Reset Flow should not allow a user to update his password when other fields are missing" time="0.645">
     </testcase>
-    <testcase classname="Password Reset Flow should not allow a user to update his password when his old password is wrong" name="Password Reset Flow should not allow a user to update his password when his old password is wrong" time="0.27">
+    <testcase classname="Password Reset Flow should not allow a user to update his password when his old password is wrong" name="Password Reset Flow should not allow a user to update his password when his old password is wrong" time="1.816">
     </testcase>
-    <testcase classname="Password Reset Flow should not allow an unauthenticated user to update his password" name="Password Reset Flow should not allow an unauthenticated user to update his password" time="0.046">
+    <testcase classname="Password Reset Flow should not allow an unauthenticated user to update his password" name="Password Reset Flow should not allow an unauthenticated user to update his password" time="0.06">
     </testcase>
-    <testcase classname="Password Reset Flow should send a password reset request" name="Password Reset Flow should send a password reset request" time="0.078">
+    <testcase classname="Password Reset Flow should send a password reset request" name="Password Reset Flow should send a password reset request" time="0.099">
     </testcase>
-    <testcase classname="Password Reset Flow should reset a password with a valid token" name="Password Reset Flow should reset a password with a valid token" time="0.079">
+    <testcase classname="Password Reset Flow should reset a password with a valid token" name="Password Reset Flow should reset a password with a valid token" time="0.132">
     </testcase>
-    <testcase classname="Password Reset Flow should not reset a password with an invalid token" name="Password Reset Flow should not reset a password with an invalid token" time="0.142">
+    <testcase classname="Password Reset Flow should not reset a password with an invalid token" name="Password Reset Flow should not reset a password with an invalid token" time="0.341">
     </testcase>
-    <testcase classname="Account Modification Flow should allow an authenticated user to update his name" name="Account Modification Flow should allow an authenticated user to update his name" time="0.254">
+    <testcase classname="Account Modification Flow should allow an authenticated user to update his name" name="Account Modification Flow should allow an authenticated user to update his name" time="0.767">
     </testcase>
-    <testcase classname="Account Modification Flow should not allow an unauthenticated user to update his name" name="Account Modification Flow should not allow an unauthenticated user to update his name" time="0.044">
+    <testcase classname="Account Modification Flow should not allow an unauthenticated user to update his name" name="Account Modification Flow should not allow an unauthenticated user to update his name" time="0.109">
     </testcase>
-    <testcase classname="User Deletion Flow should delete an authenticated user" name="User Deletion Flow should delete an authenticated user" time="0.219">
+    <testcase classname="User Deletion Flow should delete an authenticated user" name="User Deletion Flow should delete an authenticated user" time="0.531">
     </testcase>
-    <testcase classname="User Deletion Flow should clean up database connection" name="User Deletion Flow should clean up database connection" time="0">
+    <testcase classname="User Deletion Flow should clean up database connection" name="User Deletion Flow should clean up database connection" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>
