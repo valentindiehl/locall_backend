@@ -219,6 +219,18 @@ router.patch('/name', auth.required, (req, res) => {
 });
 
 /**
+ * Get own account data
+ */
+router.get('/', auth.required, (req, res) => {
+   const {payload: {id}} = req;
+
+   Users.findById(id)
+       .then((account) => {
+           return res.status(200).json(account);
+       })
+});
+
+/**
  * Delete User Request
  */
 router.delete('/', auth.required, (req, res) => {

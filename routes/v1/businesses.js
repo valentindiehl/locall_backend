@@ -5,6 +5,7 @@ const helpers = require('./helpers');
 const Businesses = mongoose.model('Businesses');
 const Users = mongoose.model('Users');
 
+
 router.get('/', auth.required, (req, res, next) => {
     Businesses.find({}, (err, businesses) => {
         /* istanbul ignore next */
