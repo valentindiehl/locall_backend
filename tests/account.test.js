@@ -7,11 +7,8 @@ const Users = mongoose.model('Users');
 
 describe('Registration & Login Flow', () => {
 
-    beforeAll(() => {
-        Users.deleteOne({email: "testaccount@valentindiehl.de"})
-            .then(() => {
-                console.log("Cleared database");
-            });
+    beforeAll(async () => {
+        await Users.deleteOne({email: "testaccount@locall-map.de"})
     });
 
     it('should create a new user', async () => {
@@ -19,7 +16,7 @@ describe('Registration & Login Flow', () => {
             .post('/v1/account')
             .send({
                 account: {
-                    email: "testaccount@valentindiehl.de",
+                    email: "testaccount@locall-map.de",
                     name: "Test User",
                     password: "test12345"
                 }
@@ -32,7 +29,7 @@ describe('Registration & Login Flow', () => {
             .post('/v1/account')
             .send({
                 account: {
-                    email: "testaccount@valentindiehl.de",
+                    email: "testaccount@locall-map.de",
                 }
             });
         expect(res.statusCode).toEqual(422);
@@ -43,7 +40,7 @@ describe('Registration & Login Flow', () => {
             .post('/v1/account')
             .send({
                 account: {
-                    email: "testaccount@valentindiehl.de",
+                    email: "testaccount@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -55,7 +52,7 @@ describe('Registration & Login Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@valentindiehl.de",
+                    email: "testaccount@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -67,7 +64,7 @@ describe('Registration & Login Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testaccount@valentindiehl.de",
+                    email: "testaccount@locall-map.de",
                 }
             });
         expect(res.statusCode).toEqual(422);
@@ -76,7 +73,7 @@ describe('Registration & Login Flow', () => {
 
     it('should validate an existing account', async () => {
         let token = "";
-        await Users.findOne({email: "testaccount@valentindiehl.de"})
+        await Users.findOne({email: "testaccount@locall-map.de"})
             .then((user) => {
                 console.log("Searching for User token...");
                 console.log(user);
@@ -98,9 +95,9 @@ describe('Registration & Login Flow', () => {
 
 describe('Login Flow', () => {
 
-    beforeAll((done) => {
+     beforeAll((done) => {
         const user = {
-            email: "testuser@nonexisting.de",
+            email: "testaccount2@locall-map.de",
             name: "Name to test"
         }
         const finalUser = new Users(user);
@@ -117,7 +114,7 @@ describe('Login Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -129,7 +126,7 @@ describe('Login Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test123456"
                 }
             });
@@ -141,7 +138,7 @@ describe('Login Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "nonexisting@nonexisting.de",
+                    email: "test2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -157,7 +154,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -182,7 +179,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -205,7 +202,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -228,7 +225,7 @@ describe('Password Reset Flow', () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount2@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -264,7 +261,7 @@ describe('Password Reset Flow', () => {
             .patch('/v1/account/password')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de"
+                    email: "testaccount@locall-map.de"
                 }
             });
         expect(res.statusCode).toEqual(200);
@@ -275,11 +272,11 @@ describe('Password Reset Flow', () => {
             .patch('/v1/account/password')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de"
+                    email: "testaccount@locall-map.de"
                 }
             })
            .then((res) => {
-            Users.findOne({email: "testuser@nonexisting.de"}).exec()
+            Users.findOne({email: "testaccount@locall-map.de"}).exec()
                 .then((user) => {
                     request(app)
                         .patch('/v1/account/password')
@@ -316,6 +313,8 @@ describe('Password Reset Flow', () => {
     });
 });
 
+
+
 describe("Account Modification Flow", () => {
 
     it('should allow an authenticated user to update his name', async() => {
@@ -323,7 +322,7 @@ describe("Account Modification Flow", () => {
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount@locall-map.de",
                     password: "test12345"
                 }
             });
@@ -359,14 +358,14 @@ describe('User Deletion Flow', () => {
 
     afterAll(() => {
         mongoose.disconnect();
-    })
+    });
 
     it('should delete an authenticated user', async() => {
         let res = await request(app)
             .post('/v1/account/login')
             .send({
                 account: {
-                    email: "testuser@nonexisting.de",
+                    email: "testaccount@locall-map.de",
                     password: "test12345"
                 }
             });
