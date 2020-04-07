@@ -29,7 +29,6 @@ router.get('/:id', auth.required, (req, res, next) => {
     Businesses.findOne({_id: req.params.id}, (err, business) => {
         /* istanbul ignore next */
         if (err) {
-            console.log(err);
             /* istanbul ignore next */
             return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
         }
