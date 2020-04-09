@@ -31,10 +31,15 @@ module.exports = {
 
 function joinChatRoom(user, io, socket, data) {
 	// TODO
+	// Step 1: Verify that chat ID is valid and stream is currently/soon live
+	// Step 2: Join the room and update everyone in the room
 }
 
 function sendChatMessage(user, io, socket, data) {
 	// TODO
+	// Step 1: Check if user's chat room is valid
+	// Step 2: Check if message does not contain swear words
+	// Step 3: Emit message to everyone in the room
 }
 
 function leaveChatRoom(io, socket) {
