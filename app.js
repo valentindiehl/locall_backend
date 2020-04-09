@@ -30,7 +30,7 @@ const accessLogStream = rfs.createStream('access.log', {
 	path: path.join(__dirname, 'log')
 });
 
-app.use(morgan('combined', { stream: accessLogStream }));
+app.use(morgan('combined', {stream: accessLogStream}));
 
 const sessionStore = new mongoStore({
 	mongooseConnection: mongoose.connection,
@@ -64,28 +64,31 @@ require('./config/passport');
 app.use("/", require('./routes'));
 
 if (!isProduction) {
-	app.use((err, req, res) => {
+	app.use((err, req, res, next) => {
 		res.status(err.status || 500);
 
 		res.json({
-			errors: {
-				message: err.message,
+			error: {
+				message: err.code === "LIMIT_FILE_SIZE" ? "Bitte lade nur Dateien unter 2MB hoch." : err.message,
 				error: err,
 			},
 		});
 	});
 }
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
 	res.status(err.status || 500);
 
 	res.json({
-		errors: {
+		error: {
 			message: err.message,
 			error: {},
 		},
 	});
 });
+
+app.use(express.static('public'));
+
 
 const mongoDB = "mongodb" + (!!process.env.MONGO_DB_SRV ? process.env.MONGO_DB_SRV : "") + "://" + process.env.MONGO_DB_USERNAME + ":" + process.env.MONGO_DB_PASSWORD + "@" + process.env.MONGO_DB_URL + "/" + process.env.MONGO_DB_NAME;
 
