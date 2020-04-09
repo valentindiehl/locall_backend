@@ -19,7 +19,7 @@ module.exports = {
 	getUser: function (userId, callback) {
 		Users.findById(userId).then((user) => {
 			if (!user) {
-				console.log("No user found for ID", id);
+				console.log("No user found for ID", userId);
 				return;
 			}
 			callback(user);
