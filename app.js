@@ -87,33 +87,6 @@ app.use((err, req, res) => {
 	});
 });
 
-// socket.io handling
-// Documentation to our socket.io events here:
-// https://locall.atlassian.net/l/c/o815y8vi
-
-const io = require('socket.io')(server, {'pingInterval': 5000});
-
-const roomHandler = require('./handlers/RoomHandler');
-const signalHandler = require('./handlers/SignalHandler');
-const voiceHandler = require('./handlers/VoiceHandler');
-
-// IO Events
-io.use(function (socket, next) {
-	sessionMware(socket.handshake, {}, next);
-});
-
-io.on('connection', function (socket) {
-	console.debug('New client!', socket.id);
-	roomHandler.init(io, socket);
-	signalHandler.init(io, socket);
-	voiceHandler.init(io, socket);
-
-	socket.on('disconnect', function (reason) {
-		console.debug('Client left!', socket.id, "because", reason);
-		roomHandler.handleDisconnect(io, socket);
-	});
-});
-
 const mongoDB = "mongodb" + (!!process.env.MONGO_DB_SRV ? process.env.MONGO_DB_SRV : "") + "://" + process.env.MONGO_DB_USERNAME + ":" + process.env.MONGO_DB_PASSWORD + "@" + process.env.MONGO_DB_URL + "/" + process.env.MONGO_DB_NAME;
 
 const options = {
