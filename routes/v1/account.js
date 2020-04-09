@@ -1,14 +1,48 @@
 const mongoose = require('mongoose');
 const passport = require('passport');
+const express = require('express');
 const router = require('express').Router();
 const auth = require('../auth');
 const Users = mongoose.model('Users');
 const Businesses = mongoose.model('Businesses');
 const axios = require('axios');
 const helpers = require('./helpers');
+const multer = require('multer');
+const _ = require('lodash');
+var fs = require('fs');
+
 
 router.use(passport.initialize());
 router.use(passport.session());
+
+let storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public')
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9) + "." + express.static.mime.extension(file.mimetype);
+        cb(null, file.fieldname + '-' + uniqueSuffix)
+    }
+});
+
+var fileFilter = function(req, file, cb) {
+    var allowedMimes = ['image/jpeg', 'image/pjpeg', 'image/png', 'image/gif'];
+
+    if (_.includes(allowedMimes, file.mimetype)) {
+        cb(null, true);
+    } else {
+        cb(new Error('Bitte lade nur Bilder des Typs .jpg, .png oder .gif hoch!'));
+    }
+};
+
+let upload = multer({
+    storage: storage,
+    limits: {
+        files: 1,
+        fileSize: 1024 * 1024 * 2,
+    },
+    fileFilter: fileFilter
+});
 
 /**
  * Registration Flow
@@ -218,6 +252,26 @@ router.patch('/name', auth.required, (req, res) => {
         });
 });
 
+router.patch('/avatar', [upload.single('avatar'), auth.required], (req, res) => {
+    const { payload: {id}} = req;
+
+    Users.findById(id)
+        .then((account) => {
+            console.log(account.avatarUrl.replace(req.protocol + "://" + req.get('host') + "/", ""));
+            if (account.avatarUrl)
+            {
+                fs.unlink('./public/' + account.avatarUrl.replace(req.protocol + "://" + req.get('host') + "/", ""), function(err){
+                    if (err) return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
+                });
+            }
+            account.avatarUrl = req.protocol + "://" + req.get('host') + "/" + req.file.filename;
+            account.save()
+                .then((account) => {
+                    return res.status(200).json(account);
+                });
+        });
+});
+
 /**
  * Get own account data
  */
@@ -226,7 +280,15 @@ router.get('/', auth.required, (req, res) => {
 
    Users.findById(id)
        .then((account) => {
-           return res.status(200).json(account);
+           let resData = { account: account};
+           if (account.isBusiness)
+           {
+               Businesses.findById(account.businessId)
+                   .then((business) => {
+                       resData["business"] = business;
+                       return res.status(200).json(resData);
+                   });
+           }
        })
 });
 
