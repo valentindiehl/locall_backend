@@ -6,11 +6,12 @@
 const uuid = require('uuid');
 const registeredRooms = {};
 const assignedIds = [];
+const helpers = require('./helpers')
 
 module.exports = {
 	init: function (io, socket) {
 		socket.on('requestTables', function (data) {
-			checkLogin(socket, (_) => {
+			helpers.checkLogin(socket, (_) => {
 				const companyId = checkCompanyId(socket, data);
 				if (!companyId) return;
 				updateRoomsUnicast(socket, companyId);
@@ -18,7 +19,7 @@ module.exports = {
 		});
 
 		socket.on('addTable', function (data) {
-			checkLogin(socket, (_) => {
+			helpers.checkLogin(socket, (_) => {
 				const companyId = checkCompanyId(socket, data);
 				if (!companyId) return;
 
@@ -34,7 +35,7 @@ module.exports = {
 		});
 
 		socket.on('joinTable', function (data) {
-			checkLogin(socket, (userId) => {
+			helpers.checkLogin(socket, (userId) => {
 				if (typeof data === 'undefined' || typeof data.tableId === 'undefined') {
 					socket.emit('tableException', {message: 'Request parameters are empty. Please select a table!'});
 					return;
@@ -188,20 +189,6 @@ function getRoomName(rooms) {
 		"Bio",
 		"Stochas"].filter(x => !chosenNames.includes(x));
 	return difference[Math.floor(Math.random() * difference.length)];
-}
-
-function checkLogin(socket, callback) {
-	socket.handshake.session.reload(function (err) {
-		if (!!err) {
-			console.debug(err);
-			return;
-		}
-		if (!socket.handshake.session.userId) {
-			console.debug("User not logged in");
-			return;
-		}
-		callback(socket.handshake.session.userId);
-	});
 }
 
 function checkCompanyId(socket, data) {
