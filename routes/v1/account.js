@@ -252,19 +252,24 @@ router.patch('/name', auth.required, (req, res) => {
         });
 });
 
-router.patch('/avatar', [upload.single('avatar'), auth.required], (req, res) => {
+router.patch('/', [upload.single('avatar'), auth.required], (req, res) => {
     const { payload: {id}} = req;
 
     Users.findById(id)
         .then((account) => {
-            console.log(account.avatarUrl.replace(req.protocol + "://" + req.get('host') + "/", ""));
-            if (account.avatarUrl)
+            if (req.body.name) account.name = req.body.name;
+            console.log(req.file);
+            if (req.file)
             {
-                fs.unlink('./public/' + account.avatarUrl.replace(req.protocol + "://" + req.get('host') + "/", ""), function(err){
-                    if (err) return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
-                });
+                if (account.avatarUrl)
+                {
+                    fs.unlink('./public/' + account.avatarUrl.replace(req.protocol + "://" + req.get('host') + "/", ""), function(err){
+                        if (err) return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
+                    });
+                }
+                account.avatarUrl = req.protocol + "://" + req.get('host') + "/" + req.file.filename;
             }
-            account.avatarUrl = req.protocol + "://" + req.get('host') + "/" + req.file.filename;
+
             account.save()
                 .then((account) => {
                     return res.status(200).json(account);
