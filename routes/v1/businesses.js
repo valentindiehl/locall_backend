@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const helpers = require('./helpers');
 const Businesses = mongoose.model('Businesses');
 const Users = mongoose.model('Users');
+const Donations = mongoose.model('Donations');
 
 
 router.get('/', auth.required, (req, res, next) => {
@@ -39,5 +40,20 @@ router.get('/:id', auth.required, (req, res, next) => {
     });
 });
 
+router.get('/:id/donations', auth.required, (req, res, next) => {
+    const { payload: {id}} = req;
+
+    Users.findById(id)
+        .then((user) => {
+            if (!user.isBusiness || user.businessId !== req.params.id) return res.status(401).json(helpers.ErrorObject(401, "Unauthorized"));
+            Donations.find( { businessId: user.businessId })
+                .then((docs) => {
+                   return res.status(200).json({ donations: docs })
+                })
+                .catch((err) => {
+                    return res.status(500).json(helpers.ErrorObject(500, "Internal Error"));
+                });
+        })
+});
 
 module.exports = router;
