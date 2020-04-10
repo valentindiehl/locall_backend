@@ -7,7 +7,7 @@ const mongoStore = require('connect-mongo')(session);
 const tableRoomHandler = require('./handlers/TableRoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
 const voiceHandler = require('./handlers/VoiceHandler');
-const chatHandler = require('./handlers/ChatHandler');
+const liveStreamHandler = require('./handlers/LiveStreamHandler');
 
 mongoose.connection.once('open', function () {
 	app.emit('ready');
@@ -42,12 +42,12 @@ app.on('ready', function () {
 		tableRoomHandler.init(io, socket);
 		signalHandler.init(io, socket);
 		voiceHandler.init(io, socket);
-		chatHandler.init(io, socket);
+		liveStreamHandler.init(io, socket);
 
 		socket.on('disconnect', function (reason) {
 			console.debug('Client left!', socket.id, "because", reason);
 			tableRoomHandler.handleDisconnect(io, socket);
-			chatHandler.handleDisconnect(io, socket);
+			liveStreamHandler.handleDisconnect(io, socket);
 		});
 	});
 });
