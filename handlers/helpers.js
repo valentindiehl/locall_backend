@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Users = mongoose.model("Users");
+const badWords = require("../data/badWords").words;
 
 module.exports = {
 	checkLogin: function (socket, callback) {
@@ -24,5 +25,30 @@ module.exports = {
 			}
 			callback(user);
 		}).catch(console.log);
+	},
+
+	tokenize: function (phrase) {
+		// After https://github.com/thisandagain/washyourmouthoutwithsoap/
+		phrase = phrase
+			.toLowerCase()
+			.replace(/[\s+]+/g, ' ');
+		const withPunctuation = phrase
+			.replace('/ {2,}/', ' ')
+			.split(' ');
+		const withoutPunctuation = phrase
+			.replace(/[^\w\s]/g, '')
+			.replace('/ {2,}/', ' ')
+			.split(' ');
+
+		return withPunctuation.concat(withoutPunctuation);
+	},
+
+	hasSwearWords: function (phrase) {
+		const tokens = this.tokenize(phrase);
+		for (let i in tokens) {
+			// noinspection JSUnfilteredForInLoop
+			if (badWords.indexOf(tokens[i]) >= 0) return true;
+		}
+		return false;
 	}
 }

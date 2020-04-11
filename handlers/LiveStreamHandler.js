@@ -1,5 +1,4 @@
 const helpers = require("./helpers");
-const wash = require("washyourmouthoutwithsoap");
 const urlMatcher = new RegExp("^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
 
 module.exports = {
@@ -95,7 +94,7 @@ function getUserRepresentation(user, socket) {
 
 function isBadText(text) {
 	// Check bad words
-	if (wash.check("de", text)) return true;
+	if (helpers.hasSwearWords(text)) return true;
 	// Check URL
 	return !!urlMatcher.exec(text);
 
