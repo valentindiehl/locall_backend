@@ -7,7 +7,7 @@ const Users = mongoose.model('Users');
 const Donations = mongoose.model('Donations');
 
 
-router.get('/', auth.required, (req, res, next) => {
+router.get('/', (req, res, next) => {
     Businesses.find({}, (err, businesses) => {
         /* istanbul ignore next */
         if (err)
@@ -26,7 +26,7 @@ router.get('/', auth.required, (req, res, next) => {
     })
 });
 
-router.get('/:id', auth.required, (req, res, next) => {
+router.get('/:id', (req, res, next) => {
     Businesses.findOne({_id: req.params.id}, (err, business) => {
         /* istanbul ignore next */
         if (err) {
