@@ -60,6 +60,8 @@ if (!isProduction) {
 require('./models/users');
 require('./models/businesses');
 require('./models/application');
+require('./models/events');
+require('./models/donations');
 require('./config/passport');
 app.use("/", require('./routes'));
 

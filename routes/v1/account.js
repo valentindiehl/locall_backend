@@ -293,7 +293,7 @@ router.get('/', auth.required, (req, res) => {
                        resData["business"] = business;
                        return res.status(200).json(resData);
                    });
-           }
+           } else return res.status(200).json(resData);
        })
 });
 
