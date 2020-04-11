@@ -1,4 +1,6 @@
-const helpers = require("./helpers")
+const helpers = require("./helpers");
+const wash = require("washyourmouthoutwithsoap");
+const urlMatcher = new RegExp("^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
 
 module.exports = {
 	init: function (io, socket) {
@@ -46,14 +48,18 @@ function joinChatRoom(user, io, socket, data) {
 
 function sendChatMessage(user, io, socket, data) {
 	checkUserRoom(socket, (roomId) => {
-		// TODO: Check if message does not contain swear words
 		const userRepresentation = getUserRepresentation(user, socket);
-		const text = data.text;
+		let text = data.text;
 		if (!text) return;
+		let className = null;
+		if (isBadText(text)) {
+			text = "Nachricht wurde blockiert.";
+			className = "blocked";
+		}
 		io.of('/').to(roomId).emit('chatMessage', {
 			user: userRepresentation,
 			message: text,
-			className: null
+			className: className
 		});
 	});
 	// Step 3: Emit message to everyone in the room
@@ -80,10 +86,17 @@ function checkUserRoom(socket, callback) {
 }
 
 function getUserRepresentation(user, socket) {
-	const userRepresentation = {
+	return {
 		name: user.name,
 		avatarUrl: user.avatarUrl,
 		socketId: socket.id
-	}
-	return userRepresentation;
+	};
+}
+
+function isBadText(text) {
+	// Check bad words
+	if (wash.check("de", text)) return true;
+	// Check URL
+	return !!urlMatcher.exec(text);
+
 }
