@@ -4,9 +4,8 @@ const { Schema } = mongoose;
 
 const EventsSchema = new Schema({
     businessId: String,
-    artistId: String,
     artistName: String,
-    BusinessName: String,
+    businessName: String,
     businessPaypal: String,
     artistPaypal: String,
     startingTime: Date,
