@@ -267,7 +267,7 @@ router.patch('/', [upload.single('avatar'), auth.required], (req, res) => {
                         if (err) return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
                     });
                 }
-                account.avatarUrl = req.protocol + "://" + req.get('host') + "/" + req.file.filename;
+                account.avatarUrl = process.env.PROTOCOL + "://" + req.get('host') + "/" + req.file.filename;
             }
 
             account.save()
