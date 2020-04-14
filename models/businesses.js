@@ -15,6 +15,7 @@ const BusinessSchema = new Schema({
     },
     paypal: String,
     image_url: String,
+    business_url: String,
     tables: [
         {
             id: Number,
