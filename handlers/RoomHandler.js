@@ -35,6 +35,7 @@ module.exports = {
 
 		socket.on('joinTable', function (data) {
 			checkLogin(socket, (userId) => {
+
 				if (typeof data === 'undefined' || typeof data.tableId === 'undefined') {
 					socket.emit('tableException', {message: 'Request parameters are empty. Please select a table!'});
 					return;
