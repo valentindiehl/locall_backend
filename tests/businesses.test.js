@@ -38,11 +38,11 @@ describe('Account List Generation', () => {
         await testBusiness.save();
     });
 
-    it('should not return the businesses if not authenticated', async () => {
+    it('should return the businesses if not authenticated', async () => {
         const res = await request(app)
             .get('/v1/businesses')
             .send();
-        expect(res.statusCode).toEqual(401);
+        expect(res.statusCode).toEqual(200);
     });
 
     it('should return a list of businesses from the database if authenticated', async () => {
@@ -66,11 +66,11 @@ describe('Account List Generation', () => {
         expect(res.body).toHaveProperty('data');
     });
 
-    it('should not return a particular business if not authenticated', async () => {
+    it('should return a particular business if not authenticated', async () => {
         const res = await request(app)
             .get('/v1/businesses/9e86f61d1c9d440000118e29')
             .send();
-        expect(res.statusCode).toEqual(401);
+        expect(res.statusCode).toEqual(200);
     });
 
     it('should return a particular businesses from the database if authenticated', async () => {
