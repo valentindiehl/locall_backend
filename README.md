@@ -1,3 +1,8 @@
+[![<LOCALL>](https://circleci.com/gh/valentindiehl/locall_backend/tree/development.svg?style=shield)](https://circleci.com/gh/valentindiehl/locall_backend/tree/development)
+[![codecov](https://codecov.io/gh/valentindiehl/locall_backend/branch/development/graph/badge.svg)](https://codecov.io/gh/valentindiehl/locall_backend)
+[![deps](https://david-dm.org/valentindiehl/locall_backend.svg)](https://david-dm.org/valentindiehl/locall_backend)
+[![devDeps](https://david-dm.org/valentindiehl/locall_backend/dev-status.svg)](https://david-dm.org/valentindiehl/locall_backend?type=dev)
+
 Auf der interaktiven (Web-)Plattform locall verbinden wir Solidarität mit der Aufrechterhaltung des (persönlichen) sozialen Netzwerkes.
 
 ## Problematik

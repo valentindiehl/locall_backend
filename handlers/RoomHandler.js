@@ -1,14 +1,16 @@
-const uuid = require('uuid');
-const Users = require('mongoose').model("Users");
+/**
+ * Documentation to the events declared here, can be found here:
+ * https://locall.atlassian.net/l/c/hSXHfUGm
+ */
 
-// TODO: Use namespaces for different cafes
-//  and change registeredRooms to object mapping from cafe to array of rooms
+const uuid = require('uuid');
 const registeredRooms = {};
 const assignedIds = [];
+
 module.exports = {
 	init: function (io, socket) {
 		socket.on('requestTables', function (data) {
-			checkLogin(socket, (userId) => {
+			checkLogin(socket, (_) => {
 				const companyId = checkCompanyId(socket, data);
 				if (!companyId) return;
 				updateRoomsUnicast(socket, companyId);
@@ -16,7 +18,7 @@ module.exports = {
 		});
 
 		socket.on('addTable', function (data) {
-			checkLogin(socket, (userId) => {
+			checkLogin(socket, (_) => {
 				const companyId = checkCompanyId(socket, data);
 				if (!companyId) return;
 
@@ -33,6 +35,7 @@ module.exports = {
 
 		socket.on('joinTable', function (data) {
 			checkLogin(socket, (userId) => {
+
 				if (typeof data === 'undefined' || typeof data.tableId === 'undefined') {
 					socket.emit('tableException', {message: 'Request parameters are empty. Please select a table!'});
 					return;
@@ -44,6 +47,16 @@ module.exports = {
 				const roomId = data.tableId;
 				const sockets = io.of("/").in().adapter.rooms[roomId];
 				if (!assignedIds.includes(roomId) && (typeof sockets === 'undefined' || sockets.length < 1)) {
+					let roomsInCompany = registeredRooms[companyId];
+					if (!!roomsInCompany && !!roomsInCompany[roomId]) delete registeredRooms[companyId][roomId]; // Cleanup not existing tables
+					socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
+					return;
+				}
+				if (!assignedIds.includes(roomId) && !registeredRooms[companyId]) {
+					socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
+					return;
+				}
+				if (!assignedIds.includes(roomId) && !!registeredRooms[companyId] && !registeredRooms[companyId][roomId]) {
 					socket.emit('tableException', {message: 'The requested table does not exist! Please try another one!'});
 					return;
 				}
@@ -101,11 +114,12 @@ function joinRoom(io, socket, roomId, companyId, userId) {
 	if (!registeredRooms[companyId][roomId]) {
 		const room = io.of("/").in().adapter.rooms[roomId];
 		room.prefixName = getRoomName(Object.values(registeredRooms[companyId]));
-		room.participants = {}
-		room.participants[socket.id] = userId;
+		room.participants = {};
+		room.companyId = companyId;
 		registeredRooms[companyId][roomId] = room;
+		room.participants[socket.id] = {userId: userId};
 	} else {
-		registeredRooms[companyId][roomId].participants[socket.id] = userId;
+		registeredRooms[companyId][roomId].participants[socket.id] = {userId: userId};
 	}
 	socket.emit('joinedTable', {'tableId': roomId, 'tables': getRooms(companyId), 'myId': userId});
 	updateRoomsBroadcast(io, socket, companyId);
@@ -126,7 +140,7 @@ function leaveRoom(socket, io, companyId) {
 		delete registeredRooms[companyId][roomId][socketId];
 		let room = io.of("/").in().adapter.rooms[roomId];
 		// Check if room is empty
-		if (typeof room === "undefined" && typeof registeredRooms[companyId][roomId] !== 'undefined') {
+		if ((!room || room.length === 0) && !!registeredRooms[companyId][roomId]) {
 			// If so, remove it from memory
 			delete registeredRooms[companyId][roomId];
 		}

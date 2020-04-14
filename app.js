@@ -12,14 +12,25 @@ const {Schema} = mongoose;
 const mongoStore = require('connect-mongo')(session);
 require('dotenv').config();
 
+const morgan = require('morgan');
+const rfs = require('rotating-file-stream'); // version 2.x
+
 const isProduction = process.env.NODE_ENV === 'debug';
 const app = express();
 var server = require('http').Server(app);
+
 
 app.use(cors({
 	origin: process.env.FRONT_URL,
 	credentials: true
 }));
+
+const accessLogStream = rfs.createStream('access.log', {
+	interval: '1d', // rotate daily
+	path: path.join(__dirname, 'log')
+});
+
+app.use(morgan('combined', { stream: accessLogStream }));
 
 const sessionStore = new mongoStore({
 	mongooseConnection: mongoose.connection,
@@ -49,38 +60,47 @@ if (!isProduction) {
 require('./models/users');
 require('./models/businesses');
 require('./models/application');
+require('./models/events');
+require('./models/donations');
 require('./config/passport');
 app.use("/", require('./routes'));
 
 if (!isProduction) {
-	app.use((err, req, res) => {
+	app.use((err, req, res, next) => {
 		res.status(err.status || 500);
 
 		res.json({
-			errors: {
-				message: err.message,
+			error: {
+				message: err.code === "LIMIT_FILE_SIZE" ? "Bitte lade nur Dateien unter 2MB hoch." : err.message,
 				error: err,
 			},
 		});
 	});
 }
 
-app.use((err, req, res) => {
+app.use((err, req, res, next) => {
 	res.status(err.status || 500);
 
 	res.json({
-		errors: {
+		error: {
 			message: err.message,
 			error: {},
 		},
 	});
 });
 
+app.use(express.static('public'));
+
+
 // socket.io handling
+// Documentation to our socket.io events here:
+// https://locall.atlassian.net/l/c/o815y8vi
+
 const io = require('socket.io')(server, {'pingInterval': 5000});
 
 const roomHandler = require('./handlers/RoomHandler');
 const signalHandler = require('./handlers/SignalHandler');
+const voiceHandler = require('./handlers/VoiceHandler');
 
 // IO Events
 io.use(function (socket, next) {
@@ -91,6 +111,7 @@ io.on('connection', function (socket) {
 	console.debug('New client!', socket.id);
 	roomHandler.init(io, socket);
 	signalHandler.init(io, socket);
+	voiceHandler.init(io, socket);
 
 	socket.on('disconnect', function (reason) {
 		console.debug('Client left!', socket.id, "because", reason);
@@ -98,11 +119,8 @@ io.on('connection', function (socket) {
 	});
 });
 
-server.on('ready', function () {
-	server.listen(8000, () => console.debug('Server running on http://localhost:8000/'));
-});
+const mongoDB = "mongodb" + (!!process.env.MONGO_DB_SRV ? process.env.MONGO_DB_SRV : "") + "://" + process.env.MONGO_DB_USERNAME + ":" + process.env.MONGO_DB_PASSWORD + "@" + process.env.MONGO_DB_URL + "/" + process.env.MONGO_DB_NAME;
 
-const mongoDB = "mongodb://" + process.env.MONGO_DB_USERNAME + ":" + process.env.MONGO_DB_PASSWORD + "@" + process.env.MONGO_DB_URL + "/" + process.env.MONGO_DB_NAME;
 const options = {
 	useNewUrlParser: true,
 	reconnectTries: Number.MAX_VALUE,
@@ -112,9 +130,8 @@ const options = {
 
 mongoose.connect(mongoDB, options);
 mongoose.promise = global.Promise;
-mongoose.set('debug', true);
-mongoose.connection.once('open', function () {
-	server.emit('ready');
-});
+//mongoose.set('debug', true);
+
+module.exports = app;
 
 

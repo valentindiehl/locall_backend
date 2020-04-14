@@ -68,24 +68,6 @@ router.get('/:id', auth.required, (req, res, next) => {
     });
 });
 
-router.get('/me', auth.required, (req, res, next) => {
-   const {payload: {id}} = req;
 
-   Users.findById(id)
-       .then((user) => {
-          if (!user) return res.status(400).json({message: 'Bad request.'});
-          if (!user.isBusiness) return res.status(401).json({message: 'Not authorized for business API.'});
-
-           Businesses.findOne({id: user.businessId}, function(err, business) {
-              if (err) return res.status(500).message("Internal error. Please try again later.");
-              if (!business)
-              {
-                  return res.status(500).message("Could not find your business. Please consult technical support");
-              }
-              return res.status(200).json(business);
-           });
-       });
-   return res.status(400).message("Bad request.");
-});
 
 module.exports = router;

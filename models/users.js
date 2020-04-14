@@ -9,11 +9,12 @@ const UsersSchema = new Schema({
     name: String,
     city: String,
     optInToken: String,
+    avatarUrl: String,
     isOptedIn: Boolean,
     resetPasswordToken: String,
     resetPasswordExpires: Date,
     isBusiness: Boolean,
-    businessId: Number,
+    businessId: String,
     hash: String,
     salt: String,
 });
