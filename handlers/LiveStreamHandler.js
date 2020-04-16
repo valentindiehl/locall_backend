@@ -61,7 +61,6 @@ function sendChatMessage(user, io, socket, data, className) {
 			className: className
 		});
 	});
-	// Step 3: Emit message to everyone in the room
 }
 
 function leaveChatRoom(io, socket) {
