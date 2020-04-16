@@ -1,23 +1,16 @@
 const helpers = require("./helpers");
 const urlMatcher = new RegExp("^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
 
+const participantCount = {};
+
 module.exports = {
 	init: function (io, socket) {
 		socket.on("joinLiveStream", function (data) {
-				helpers.checkLogin(socket, (userId) => {
-					helpers.getUser(userId, (user) => {
-						joinChatRoom(user, io, socket, data);
-					});
-				});
-			}
-		);
+			joinChatRoom(io, socket, data);
+		});
 
 		socket.on("chatMessage", function (data) {
-			helpers.checkLogin(socket, (userId) => {
-				helpers.getUser(userId, (user) => {
-					sendChatMessage(user, io, socket, data);
-				});
-			});
+			chatMessage(socket, io, data, null);
 		});
 
 		socket.on("leaveLiveStream", function () {
@@ -30,7 +23,7 @@ module.exports = {
 	}
 }
 
-function joinChatRoom(user, io, socket, data) {
+function joinChatRoom(io, socket, data) {
 	leaveChatRoom(io, socket);
 	if (!data.liveStreamId) {
 		socket.emit('liveStreamException', {message: "No live stream ID given."})
@@ -40,17 +33,24 @@ function joinChatRoom(user, io, socket, data) {
 	socket.join(roomId);
 	socket.chatRoom = roomId;
 	const sockets = io.of("/").in().adapter.rooms[roomId];
-	const userRepresentation = getUserRepresentation(user, socket);
 	const participantCount = sockets.length;
-	io.of('/').to(roomId).emit('joinedLiveStream', {participantCount: participantCount, user: userRepresentation});
+	io.of('/').to(roomId).emit('joinedLiveStream', {participantCount: participantCount});
+	chatMessage(socket, io, {text: "ist beigetreten!"}, "joined");
 }
 
-function sendChatMessage(user, io, socket, data) {
+function chatMessage(socket, io, data, className) {
+	helpers.checkLogin(socket, (userId) => {
+		helpers.getUser(userId, (user) => {
+			sendChatMessage(user, io, socket, data, className);
+		});
+	});
+}
+
+function sendChatMessage(user, io, socket, data, className) {
 	checkUserRoom(socket, (roomId) => {
 		const userRepresentation = getUserRepresentation(user, socket);
 		let text = data.text;
 		if (!text) return;
-		let className = null;
 		if (isBadText(text)) {
 			text = "Nachricht wurde blockiert.";
 			className = "blocked";
