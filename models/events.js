@@ -9,6 +9,8 @@ const EventsSchema = new Schema({
     businessPaypal: String,
     artistPaypal: String,
     startingTime: Date,
+    description: String,
+    endTime: Date,
 }, {timestamps: true});
 
 mongoose.model('Events', EventsSchema);
