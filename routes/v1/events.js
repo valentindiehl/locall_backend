@@ -33,7 +33,7 @@ router.post('/', auth.optional, (req, res) => {
 });
 
 router.get('/', auth.optional, (req, res) => {
-    Events.find({startingTime: { $gte: Date.now()}}, (err, events) => {
+    Events.find({endTime: { $gte: Date.now()}}, (err, events) => {
         return res.status(200).json(events);
     });
 });
