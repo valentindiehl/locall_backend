@@ -34,6 +34,7 @@ function joinChatRoom(io, socket, data) {
 	const sockets = io.of("/").in().adapter.rooms[roomId];
 	const participantCount = sockets.length;
 	io.of('/').to(roomId).emit('joinedLiveStream', {participantCount: participantCount});
+	if (!data.withMessage) return;
 	chatMessage(socket, io, {text: "ist beigetreten!"}, "joined");
 }
 
