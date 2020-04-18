@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const Users = mongoose.model("Users");
+const BlockedMessages = mongoose.model("BlockedMessages");
 const badWords = require("../data/badWords").words;
 
 module.exports = {
@@ -25,6 +26,14 @@ module.exports = {
 			}
 			callback(user);
 		}).catch(console.log);
+	},
+
+	blockMessage: function (userId, eventId, text, callback) {
+		new BlockedMessages({
+			userId: userId,
+			eventId: eventId,
+			message: text
+		}).save().then(callback).catch(console.log);
 	},
 
 	tokenize: function (phrase) {

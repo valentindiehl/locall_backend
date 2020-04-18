@@ -1,7 +1,6 @@
 const helpers = require("./helpers");
 const urlMatcher = new RegExp("^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$");
 
-const participantCount = {};
 
 module.exports = {
 	init: function (io, socket) {
@@ -49,17 +48,28 @@ function chatMessage(socket, io, data, className) {
 function sendChatMessage(user, io, socket, data, className) {
 	checkUserRoom(socket, (roomId) => {
 		const userRepresentation = getUserRepresentation(user, socket);
+		if (user.blockedMessageCount >= 3) {
+			socket.emit("chatBlocked", {user: userRepresentation});
+			return;
+		}
 		let text = data.text;
 		if (!text) return;
 		if (isBadText(text)) {
-			text = "Nachricht wurde blockiert.";
-			className = "blocked";
+			helpers.blockMessage(user._id, roomId, text, () => {
+				user.blockedMessageCount = !user.blockedMessageCount ? 1 : user.blockedMessageCount + 1;
+				user.save().then(broadCastMessage(io, roomId, userRepresentation, "Nachricht wurde blockiert.", "blocked"));
+			});
+		} else {
+			broadCastMessage(io, roomId, userRepresentation, text, className);
 		}
-		io.of('/').to(roomId).emit('chatMessage', {
-			user: userRepresentation,
-			message: text,
-			className: className
-		});
+	});
+}
+
+function broadCastMessage(io, roomId, userRepresentation, text, className) {
+	io.of('/').to(roomId).emit('chatMessage', {
+		user: userRepresentation,
+		message: text,
+		className: className
 	});
 }
 
