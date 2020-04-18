@@ -9,6 +9,7 @@ router.post('/', auth.optional, (req, res) => {
     const {body: {event}} = req;
 
     if (!event.startingTime) return res.status(422).json(helpers.ErrorObject(422, "Start time is missing."));
+    if (!event.endTime) return res.status(422).json(helpers.ErrorObject(422, "End time is missing."));
     if (!event.businessId)  return res.status(422).json(helpers.ErrorObject(422, "Hosting business is missing."));
     if (!event.artistName)  return res.status(422).json(helpers.ErrorObject(422, "Artist name is missing."));
     if (!event.businessPaypal || !event.artistPaypal)  return res.status(422).json(helpers.ErrorObject(422, "paypal accounts are missing."));
@@ -32,7 +33,7 @@ router.post('/', auth.optional, (req, res) => {
 });
 
 router.get('/', auth.optional, (req, res) => {
-    Events.find({startingTime: { $gte: Date.now()}}, (err, events) => {
+    Events.find({endTime: { $gte: Date.now()}}, (err, events) => {
         return res.status(200).json(events);
     });
 });
