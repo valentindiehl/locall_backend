@@ -15,6 +15,7 @@ const UsersSchema = new Schema({
     resetPasswordExpires: Date,
     isBusiness: Boolean,
     businessId: String,
+    blockedMessageCount: Number,
     hash: String,
     salt: String,
 });
