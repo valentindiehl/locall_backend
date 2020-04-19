@@ -263,7 +263,7 @@ router.patch('/', [upload.single('avatar'), auth.required], (req, res) => {
             {
                 if (account.avatarUrl)
                 {
-                    fs.unlink('./public/' + account.avatarUrl.replace(req.protocol + "://" + req.get('host') + "/", ""), function(err){
+                    fs.unlink('./public/' + account.avatarUrl.replace(process.env.PROTOCOL + "://" + req.get('host') + "/", ""), function(err){
                         if (err) return res.status(500).json(helpers.ErrorObject(500, "Internal error."));
                     });
                 }
