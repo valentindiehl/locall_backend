@@ -28,7 +28,7 @@
     "http-errors": "^1.7.3",
     "jest-junit": "^10.0.0",
     "jsonwebtoken": "^8.5.1",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.19",
     "mongoose": "^5.9.5",
     "mongoose-sequence": "^5.2.2",
     "morgan": "^1.10.0",
